@@ -827,6 +827,153 @@ b,strong{color:var(--bold-color);font-weight:700}
 .coach-no-profile .icon{font-size:44px;margin-bottom:12px}
 .coach-no-profile h3{font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--text2);margin-bottom:6px}
 .coach-no-profile p{font-size:13px;color:var(--text3);font-weight:500;line-height:1.5}
+
+/* ─── CARDIO TRACKER ─── */
+#cardio-tracker{display:none;position:fixed;inset:0;z-index:250;flex-direction:column;background:var(--bg);max-width:480px;margin:0 auto;left:50%;transform:translateX(-50%);width:100%}
+#cardio-tracker.open{display:flex}
+
+/* Mode selector */
+.cardio-mode-bar{display:flex;gap:0;background:var(--bg3);border-bottom:1px solid var(--border);flex-shrink:0}
+.cardio-mode-btn{flex:1;padding:14px 8px;border:none;background:none;color:var(--text3);font-size:11px;font-weight:700;font-family:'DM Sans',sans-serif;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;-webkit-tap-highlight-color:transparent;display:flex;flex-direction:column;align-items:center;gap:4px;border-bottom:2px solid transparent;transition:all .2s}
+.cardio-mode-btn svg{width:20px;height:20px}
+.cardio-mode-btn.active{color:var(--accent);border-bottom-color:var(--accent)}
+
+/* Live map area */
+#cardio-map-wrap{flex:1;position:relative;background:#0d1117;min-height:0;overflow:hidden}
+#cardio-map{width:100%;height:100%}
+.map-loading-msg{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;pointer-events:none}
+.map-loading-msg svg{width:36px;height:36px;color:var(--text3)}
+.map-loading-msg p{font-size:12px;color:var(--text3);font-weight:600;text-align:center;padding:0 24px}
+
+/* GPS accuracy pill */
+.gps-pill{position:absolute;top:12px;left:50%;transform:translateX(-50%);background:rgba(10,10,15,.85);backdrop-filter:blur(8px);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:10px;font-family:'DM Mono',monospace;font-weight:700;display:flex;align-items:center;gap:5px;z-index:10;white-space:nowrap}
+.gps-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.gps-dot.good{background:var(--green);box-shadow:0 0 6px var(--green)}
+.gps-dot.ok{background:var(--orange);box-shadow:0 0 6px var(--orange)}
+.gps-dot.bad{background:var(--red);animation:pulse .8s infinite alternate}
+.gps-dot.wait{background:var(--text3);animation:pulse .8s infinite alternate}
+
+/* Pace zone badge */
+.pace-zone-badge{position:absolute;top:12px;right:12px;border-radius:8px;padding:6px 10px;font-size:11px;font-family:'DM Mono',monospace;font-weight:700;z-index:10;text-align:center}
+.pace-zone-badge .zone-name{font-size:9px;opacity:.8;letter-spacing:.06em;text-transform:uppercase}
+.zone-z1{background:rgba(64,143,255,.25);color:#60a5fa;border:1px solid rgba(64,143,255,.4)}
+.zone-z2{background:rgba(32,232,128,.25);color:#34d399;border:1px solid rgba(32,232,128,.4)}
+.zone-z3{background:rgba(232,240,32,.25);color:var(--accent);border:1px solid rgba(232,240,32,.4)}
+.zone-z4{background:rgba(255,144,32,.25);color:#fb923c;border:1px solid rgba(255,144,32,.4)}
+.zone-z5{background:rgba(255,64,96,.25);color:#f87171;border:1px solid rgba(255,64,96,.4)}
+
+/* Recenter button */
+.map-recenter-btn{position:absolute;bottom:16px;right:12px;width:40px;height:40px;background:rgba(10,10,15,.9);border:1px solid var(--border);border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text2);-webkit-tap-highlight-color:transparent;z-index:10}
+.map-recenter-btn:active{color:var(--accent);border-color:var(--accent)}
+.map-recenter-btn svg{width:18px;height:18px}
+
+/* Live stats panel */
+.cardio-stats-panel{flex-shrink:0;background:var(--bg2);border-top:1px solid var(--border);padding:14px 16px 10px}
+.cardio-primary-stat{text-align:center;margin-bottom:10px}
+.cardio-big-num{font-family:'Bebas Neue',sans-serif;font-size:72px;line-height:1;color:#fff;letter-spacing:-.02em}
+.cardio-big-num .unit{font-size:24px;color:var(--text3);margin-left:2px}
+.cardio-big-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.12em;font-family:'DM Mono',monospace;font-weight:700;margin-top:-4px}
+.cardio-stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px}
+.cardio-stat-cell{background:var(--bg3);border-radius:8px;padding:8px 4px;text-align:center}
+.csc-val{font-family:'Bebas Neue',sans-serif;font-size:18px;color:#fff;line-height:1}
+.csc-unit{font-size:9px;color:var(--text3);font-family:'DM Mono',monospace;font-weight:700;letter-spacing:.06em;margin-top:2px}
+
+/* Lap strip */
+.lap-strip{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px;margin-bottom:8px}
+.lap-strip::-webkit-scrollbar{display:none}
+.lap-chip{flex-shrink:0;background:var(--bg4);border:1px solid var(--border);border-radius:6px;padding:4px 8px;text-align:center}
+.lap-chip.current{border-color:rgba(232,240,32,.4);background:var(--accent-dim)}
+.lap-chip-num{font-size:9px;color:var(--text3);font-family:'DM Mono',monospace;font-weight:700}
+.lap-chip-time{font-family:'Bebas Neue',sans-serif;font-size:15px;color:#fff;line-height:1}
+.lap-chip.current .lap-chip-time{color:var(--accent)}
+.lap-chip-pace{font-size:9px;color:var(--text3);font-family:'DM Mono',monospace;font-weight:600}
+
+/* Controls */
+.cardio-controls{display:flex;gap:10px;flex-shrink:0;padding:10px 16px;padding-bottom:calc(10px + var(--safe-bottom));background:var(--bg);border-top:1px solid var(--border)}
+.cardio-ctrl-btn{flex:1;padding:16px;border-radius:var(--radius);border:none;font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:.08em;cursor:pointer;-webkit-tap-highlight-color:transparent;display:flex;align-items:center;justify-content:center;gap:8px;transition:opacity .15s}
+.cardio-ctrl-btn:active{opacity:.8}
+.cardio-ctrl-btn.start{background:var(--green);color:#0a0a0f}
+.cardio-ctrl-btn.pause{background:var(--orange);color:#0a0a0f}
+.cardio-ctrl-btn.resume{background:var(--accent);color:#0a0a0f}
+.cardio-ctrl-btn.stop{background:var(--red);color:#fff;flex:0 0 auto;width:56px;padding:16px 0}
+.cardio-ctrl-btn.lap{background:var(--bg3);border:1px solid var(--border);color:var(--text2);flex:0 0 auto;width:56px;padding:16px 0}
+.cardio-ctrl-btn.back-btn{background:var(--bg3);border:1px solid var(--border);color:var(--text2);flex:0 0 auto;width:56px;padding:16px 0}
+.cardio-ctrl-btn svg{width:20px;height:20px}
+
+/* Topbar */
+.cardio-topbar{display:flex;align-items:center;padding:48px 16px 0;gap:10px;flex-shrink:0;background:var(--bg2);border-bottom:1px solid var(--border)}
+.cardio-title-input{flex:1;background:none;border:none;font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:.04em;color:#fff;outline:none;padding-bottom:10px}
+.cardio-close-btn{background:none;border:none;color:var(--text3);cursor:pointer;padding:4px 4px 14px;display:flex;-webkit-tap-highlight-color:transparent}
+.cardio-close-btn:active{color:var(--red)}
+
+/* Milestone toast (shown over map) */
+.milestone-toast{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);background:rgba(10,10,15,.95);border:2px solid var(--accent);border-radius:20px;padding:20px 28px;text-align:center;z-index:600;pointer-events:none;transition:transform .3s cubic-bezier(.34,1.56,.64,1),opacity .3s}
+.milestone-toast.show{transform:translate(-50%,-50%) scale(1)}
+.milestone-toast.hide{transform:translate(-50%,-50%) scale(.9);opacity:0}
+.milestone-icon{font-size:36px;margin-bottom:6px}
+.milestone-text{font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--accent);letter-spacing:.04em;line-height:1}
+.milestone-sub{font-size:12px;color:var(--text2);margin-top:4px;font-weight:600}
+
+/* Summary screen */
+#cardio-summary{display:none;position:fixed;inset:0;background:var(--bg);z-index:300;flex-direction:column;overflow-y:auto;max-width:480px;margin:0 auto;left:50%;transform:translateX(-50%);width:100%}
+#cardio-summary.open{display:flex}
+.cardio-sum-hero{background:linear-gradient(180deg,var(--bg3) 0%,var(--bg) 100%);padding:52px 24px 24px;text-align:center;flex-shrink:0;position:relative}
+.cardio-sum-mode-icon{font-size:48px;margin-bottom:8px}
+.cardio-sum-title{font-family:'Bebas Neue',sans-serif;font-size:36px;color:#fff;letter-spacing:.04em;line-height:1}
+.cardio-sum-date{font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;font-weight:600;margin-top:4px}
+.cardio-sum-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 20px 0}
+.cardio-sum-stat{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:14px;text-align:center}
+.cardio-sum-stat.span2{grid-column:1/-1}
+.css-val{font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--accent);line-height:1}
+.css-label{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.09em;font-family:'DM Mono',monospace;font-weight:700;margin-top:3px}
+.cardio-sum-body{padding:16px 20px 80px;flex:1}
+.cardio-sum-section{margin-bottom:20px}
+.cardio-sum-section-title{font-family:'Bebas Neue',sans-serif;font-size:18px;color:#fff;letter-spacing:.04em;margin-bottom:10px}
+.cardio-sum-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--bg3)}
+.cardio-sum-row:last-child{border-bottom:none}
+.cardio-sum-key{font-size:12px;color:var(--text3);font-weight:600}
+.cardio-sum-val{font-size:13px;font-weight:700;color:#fff;font-family:'DM Mono',monospace}
+.lap-table{width:100%;border-collapse:collapse;font-size:11px}
+.lap-table th{text-align:left;color:var(--text3);font-family:'DM Mono',monospace;font-weight:700;padding:4px 0;font-size:10px;text-transform:uppercase;letter-spacing:.07em;border-bottom:1px solid var(--border)}
+.lap-table td{padding:7px 0;border-bottom:1px solid var(--bg3);color:var(--text2);font-family:'DM Mono',monospace;font-weight:600}
+.lap-table tr:last-child td{border-bottom:none}
+.lap-best{color:var(--accent)!important;font-weight:700!important}
+.afterburn-card{background:linear-gradient(135deg,rgba(255,64,96,.08),rgba(255,144,32,.08));border:1px solid rgba(255,144,32,.25);border-radius:var(--radius);padding:14px;margin-bottom:14px}
+.afterburn-title{font-family:'Bebas Neue',sans-serif;font-size:16px;color:var(--orange);margin-bottom:8px;letter-spacing:.04em}
+.afterburn-val{font-family:'Bebas Neue',sans-serif;font-size:32px;color:#fff;line-height:1}
+.afterburn-sub{font-size:11px;color:var(--text2);margin-top:4px;line-height:1.5;font-weight:500}
+.route-map-static{width:100%;height:200px;border-radius:var(--radius);overflow:hidden;background:var(--bg3);border:1px solid var(--border);margin-bottom:14px;position:relative}
+.route-map-static canvas{width:100%;height:100%}
+.cardio-sum-save-btn{width:100%;padding:16px;background:var(--accent);color:var(--bg);border:none;border-radius:var(--radius);font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:.08em;cursor:pointer;-webkit-tap-highlight-color:transparent;margin-top:16px;display:block}
+.cardio-sum-save-btn:active{background:var(--accent2)}
+.cardio-sum-discard{display:block;width:100%;padding:12px;background:none;border:none;color:var(--text3);font-size:13px;font-weight:600;cursor:pointer;margin-top:6px;-webkit-tap-highlight-color:transparent}
+
+/* History cards for runs/cycles */
+.cardio-history-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);margin:8px 16px;padding:14px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.cardio-history-card:active{border-color:var(--border2)}
+.chc-header{display:flex;align-items:flex-start;gap:12px;margin-bottom:10px}
+.chc-mode-icon{width:40px;height:40px;border-radius:10px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;border:1px solid var(--border)}
+.chc-info{flex:1}
+.chc-name{font-size:14px;font-weight:700;color:#fff}
+.chc-date{font-size:10px;color:var(--text3);font-family:'DM Mono',monospace;font-weight:600;margin-top:2px}
+.chc-stats{display:flex;gap:10px;flex-wrap:wrap}
+.chc-stat{display:flex;flex-direction:column;align-items:center;background:var(--bg3);border-radius:6px;padding:6px 10px;min-width:52px}
+.chc-stat-val{font-family:'Bebas Neue',sans-serif;font-size:17px;color:var(--accent);line-height:1}
+.chc-stat-label{font-size:8px;color:var(--text3);font-family:'DM Mono',monospace;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-top:2px}
+.chc-route-mini{height:80px;border-radius:8px;overflow:hidden;background:var(--bg3);border:1px solid var(--border);position:relative;margin-top:8px}
+.chc-route-mini canvas{width:100%;height:100%}
+
+/* Cadence / HR graph */
+.pace-graph{width:100%;height:60px;margin:8px 0}
+.pace-graph canvas{width:100%;height:100%}
+
+/* Today quick launch */
+.cardio-quick-launch{margin:0 16px 12px;display:flex;gap:8px}
+.cardio-ql-btn{flex:1;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 10px;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:border-color .15s}
+.cardio-ql-btn:active{border-color:var(--accent)}
+.cardio-ql-icon{font-size:24px}
+.cardio-ql-label{font-family:'Bebas Neue',sans-serif;font-size:14px;color:#fff;letter-spacing:.04em}
+.cardio-ql-sub{font-size:9px;color:var(--text3);font-family:'DM Mono',monospace;font-weight:700;text-align:center}
 </style>
 </head>
 <body>
@@ -1032,6 +1179,26 @@ b,strong{color:var(--bold-color);font-weight:700}
       <input class="bw-input" type="number" id="bw-today-input" placeholder="—" step="0.1" min="30" max="250" inputmode="decimal">
       <span class="bw-unit">kg</span>
       <button class="bw-save-btn" onclick="saveBWToday()">Log</button>
+    </div>
+    <div class="section-label">
+      <span>Cardio</span>
+    </div>
+    <div class="cardio-quick-launch">
+      <div class="cardio-ql-btn" onclick="openCardioTracker('run')">
+        <div class="cardio-ql-icon">🏃</div>
+        <div class="cardio-ql-label">RUN</div>
+        <div class="cardio-ql-sub" id="ql-run-stat">Track pace & route</div>
+      </div>
+      <div class="cardio-ql-btn" onclick="openCardioTracker('cycle')">
+        <div class="cardio-ql-icon">🚴</div>
+        <div class="cardio-ql-label">CYCLE</div>
+        <div class="cardio-ql-sub" id="ql-cycle-stat">Track speed & distance</div>
+      </div>
+      <div class="cardio-ql-btn" onclick="openCardioTracker('walk')">
+        <div class="cardio-ql-icon">🚶</div>
+        <div class="cardio-ql-label">WALK</div>
+        <div class="cardio-ql-sub" id="ql-walk-stat">Easy cardio</div>
+      </div>
     </div>
     <div class="section-label">
       <span>Templates</span>
@@ -1313,6 +1480,130 @@ b,strong{color:var(--bold-color);font-weight:700}
 <!-- Hidden file inputs for food scanner -->
 <input type="file" id="scan-file-camera" accept="image/*" capture="environment">
 <input type="file" id="scan-file-gallery" accept="image/*" multiple="false">
+
+<!-- CARDIO TRACKER PANEL -->
+<div id="cardio-tracker">
+  <!-- Topbar -->
+  <div class="cardio-topbar">
+    <button class="cardio-close-btn" onclick="closeCardioTracker()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg></button>
+    <input class="cardio-title-input" id="cardio-title-input" type="text" placeholder="MORNING RUN" maxlength="40">
+    <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text3);font-weight:700;padding-bottom:10px" id="cardio-date-label"></div>
+  </div>
+  <!-- Mode selector -->
+  <div class="cardio-mode-bar" id="cardio-mode-bar">
+    <button class="cardio-mode-btn" id="cardio-mode-run" onclick="setCardioMode('run')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="5" r="2"/><path d="M12 7l-2 5 4 2-2 4"/><path d="M8 12l-2 4"/><path d="M16 8l2 3"/></svg>
+      Run
+    </button>
+    <button class="cardio-mode-btn" id="cardio-mode-cycle" onclick="setCardioMode('cycle')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="18" cy="16" r="4"/><circle cx="6" cy="16" r="4"/><path d="M6 16l3-9 3 3 3-3 3 6"/><circle cx="12" cy="7" r="1"/></svg>
+      Cycle
+    </button>
+    <button class="cardio-mode-btn" id="cardio-mode-walk" onclick="setCardioMode('walk')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="5" r="2"/><path d="M12 7v6l-3 3"/><path d="M12 13l3 3"/><path d="M9 19l-1 2"/><path d="M15 19l1 2"/></svg>
+      Walk
+    </button>
+  </div>
+  <!-- Map -->
+  <div id="cardio-map-wrap">
+    <div id="cardio-map"></div>
+    <div class="map-loading-msg" id="map-loading-msg">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+      <p>Waiting for GPS signal…</p>
+    </div>
+    <div class="gps-pill" id="gps-pill"><div class="gps-dot wait" id="gps-dot"></div><span id="gps-label">Locating…</span></div>
+    <div class="pace-zone-badge zone-z2" id="pace-zone-badge" style="display:none">
+      <div id="pace-zone-name">Zone 2</div>
+      <div class="zone-name" id="pace-zone-label">Easy</div>
+    </div>
+    <button class="map-recenter-btn" id="map-recenter-btn" onclick="recenterMap()" style="display:none">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M1 12h4M19 12h4"/></svg>
+    </button>
+  </div>
+  <!-- Live stats -->
+  <div class="cardio-stats-panel">
+    <div class="cardio-primary-stat">
+      <div class="cardio-big-num" id="cardio-big-num">0<span class="unit" id="cardio-big-unit">km</span></div>
+      <div class="cardio-big-label" id="cardio-big-label">DISTANCE</div>
+    </div>
+    <div class="cardio-stat-row">
+      <div class="cardio-stat-cell"><div class="csc-val" id="csc-time">0:00</div><div class="csc-unit">Time</div></div>
+      <div class="cardio-stat-cell"><div class="csc-val" id="csc-pace">—</div><div class="csc-unit" id="csc-pace-label">Min/km</div></div>
+      <div class="cardio-stat-cell"><div class="csc-val" id="csc-cal">0</div><div class="csc-unit">kcal</div></div>
+      <div class="cardio-stat-cell"><div class="csc-val" id="csc-cadence">—</div><div class="csc-unit" id="csc-cadence-label">Cadence</div></div>
+    </div>
+    <!-- Lap strip -->
+    <div class="lap-strip" id="lap-strip"></div>
+  </div>
+  <!-- Controls -->
+  <div class="cardio-controls">
+    <button class="cardio-ctrl-btn back-btn" id="cardio-back-btn" onclick="closeCardioTracker()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <button class="cardio-ctrl-btn start" id="cardio-main-btn" onclick="cardioMainAction()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" id="cardio-main-icon"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      <span id="cardio-main-label">START</span>
+    </button>
+    <button class="cardio-ctrl-btn lap" id="cardio-lap-btn" onclick="markLap()" style="display:none">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+    </button>
+    <button class="cardio-ctrl-btn stop" id="cardio-stop-btn" onclick="stopCardio()" style="display:none">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>
+    </button>
+  </div>
+</div>
+
+<!-- CARDIO SUMMARY -->
+<div id="cardio-summary">
+  <div class="cardio-sum-hero">
+    <div class="cardio-sum-mode-icon" id="sum-mode-icon">🏃</div>
+    <div class="cardio-sum-title" id="sum-title">RUN COMPLETE</div>
+    <div class="cardio-sum-date" id="sum-date"></div>
+  </div>
+  <div class="cardio-sum-stats" id="sum-stats-grid" style="padding:16px 20px 0"></div>
+  <div class="cardio-sum-body">
+    <!-- Route mini-map -->
+    <div class="cardio-sum-section">
+      <div class="cardio-sum-section-title">ROUTE</div>
+      <div class="route-map-static" id="sum-route-map">
+        <canvas id="sum-route-canvas"></canvas>
+      </div>
+    </div>
+    <!-- Afterburn -->
+    <div class="afterburn-card" id="sum-afterburn" style="display:none">
+      <div class="afterburn-title">🔥 AFTERBURN EFFECT (EPOC)</div>
+      <div style="display:flex;align-items:baseline;gap:8px">
+        <div class="afterburn-val" id="sum-afterburn-val">0</div>
+        <div style="font-size:13px;color:var(--orange);font-family:'DM Mono',monospace;font-weight:700">extra kcal</div>
+      </div>
+      <div class="afterburn-sub" id="sum-afterburn-sub">Estimated post-exercise calorie burn over next 24h</div>
+    </div>
+    <!-- Laps -->
+    <div class="cardio-sum-section" id="sum-laps-section" style="display:none">
+      <div class="cardio-sum-section-title">LAPS</div>
+      <table class="lap-table" id="sum-lap-table"></table>
+    </div>
+    <!-- Detail stats -->
+    <div class="cardio-sum-section">
+      <div class="cardio-sum-section-title">DETAILS</div>
+      <div id="sum-details"></div>
+    </div>
+    <!-- AI Analysis -->
+    <div id="sum-ai-card" style="display:none;background:var(--bg2);border:1px solid var(--border);border-top:2px solid #7c3aed;border-radius:var(--radius);padding:14px;margin-bottom:14px">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:16px;color:#fff;letter-spacing:.04em;margin-bottom:8px">⚡ AI COACH INSIGHT</div>
+      <div id="sum-ai-text" style="font-size:13px;color:var(--text2);line-height:1.6;font-weight:500"></div>
+    </div>
+    <button class="cardio-sum-save-btn" onclick="saveCardioSession()">SAVE ACTIVITY 💪</button>
+    <button class="cardio-sum-discard" onclick="discardCardioSession()">Discard this session</button>
+  </div>
+</div>
+
+<!-- Milestone toast -->
+<div class="milestone-toast" id="milestone-toast">
+  <div class="milestone-icon" id="milestone-icon">🏅</div>
+  <div class="milestone-text" id="milestone-text">1 KM</div>
+  <div class="milestone-sub" id="milestone-sub">Keep going!</div>
+</div>
 
 <!-- ACTIVE WORKOUT PANEL -->
 <div id="active-workout">
@@ -1633,7 +1924,7 @@ function handleLogin(){
   users[username].lastLogin=Date.now();saveUsers(users);loginUser(username)
 }
 function loginUser(username){currentUser=username;saveSession({username,ts:Date.now()});loadUserData();showApp()}
-function confirmLogout(){showConfirm('Sign Out?','You\'ll need your password to sign back in.','Sign Out','danger',()=>{clearSession();currentUser=null;exercises=null;workouts=[];bodyWeightLog=[];measurements=[];templates=[];userProfile=null;chatHistory=[];nutritionLog={};macroGoals={cal:2000,protein:150,fat:65,fibre:30};recentFoods=[];showAuthScreen()})}
+function confirmLogout(){showConfirm('Sign Out?','You\'ll need your password to sign back in.','Sign Out','danger',()=>{clearSession();currentUser=null;exercises=null;workouts=[];bodyWeightLog=[];measurements=[];templates=[];userProfile=null;chatHistory=[];nutritionLog={};macroGoals={cal:2000,protein:150,fat:65,fibre:30};recentFoods=[];cardioSessions=[];showAuthScreen()})}
 
 function renderCoachView(){
   if(userProfile){
@@ -1728,6 +2019,7 @@ function loadUserData(){
   nutritionLog=JSON.parse(localStorage.getItem(uk('nutrition'))||'{}');
   macroGoals=JSON.parse(localStorage.getItem(uk('macrogoals'))||JSON.stringify({cal:2000,protein:150,fat:65,fibre:30}));
   recentFoods=JSON.parse(localStorage.getItem(uk('recentfoods'))||'[]');
+  cardioSessions=JSON.parse(localStorage.getItem(uk('cardio'))||'[]');
 }
 function saveExercisesDB(){if(currentUser)localStorage.setItem(uk('exercises'),JSON.stringify(exercises))}
 function saveWorkoutsDB(){if(currentUser)localStorage.setItem(uk('workouts'),JSON.stringify(workouts))}
@@ -1735,6 +2027,7 @@ function saveBWDB(){if(currentUser)localStorage.setItem(uk('bwlog'),JSON.stringi
 function saveMeasurementsDB(){if(currentUser)localStorage.setItem(uk('measurements'),JSON.stringify(measurements))}
 function saveTemplatesDB(){if(currentUser)localStorage.setItem(uk('templates'),JSON.stringify(templates))}
 function saveNutritionDB(){if(currentUser){localStorage.setItem(uk('nutrition'),JSON.stringify(nutritionLog));localStorage.setItem(uk('macrogoals'),JSON.stringify(macroGoals));localStorage.setItem(uk('recentfoods'),JSON.stringify(recentFoods))}}
+function saveCardioDB(){if(currentUser)localStorage.setItem(uk('cardio'),JSON.stringify(cardioSessions))}
 function getActiveKey(){return currentUser?'ironlog_u_'+currentUser+'_active':null}
 function saveActiveWorkout(d){const k=getActiveKey();if(k)localStorage.setItem(k,JSON.stringify(d))}
 function loadActiveWorkout(){const k=getActiveKey();if(!k)return null;try{return JSON.parse(localStorage.getItem(k))}catch{return null}}
@@ -1797,7 +2090,8 @@ function renderToday(){
   const recentEl=document.getElementById('recent-workouts');
   const recent=[...workouts].reverse().slice(0,3);
   if(!recent.length){recentEl.innerHTML=`<div class="empty-state"><div class="icon">💪</div><h3>No workouts yet</h3><p>Start your first session to build your log!</p><button class="empty-state-btn" onclick="startWorkout()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>Start Now</button></div>`;return}
-  recentEl.innerHTML='';recent.forEach(w=>recentEl.appendChild(buildHistoryCard(w,false)))
+  recentEl.innerHTML='';recent.forEach(w=>recentEl.appendChild(buildHistoryCard(w,false)));
+  renderCardioHistoryOnToday();
 }
 
 function saveBWToday(){
@@ -1874,6 +2168,7 @@ function calcStreak(){if(!workouts.length)return 0;const now=new Date();now.setH
 // WORKOUT
 // ═══════════════════════════════════════════
 let activeWorkout=null,workoutTimerInterval=null,restTimerInterval=null,restTimerSeconds=0,restTimerTotal=0,editingExerciseId=null,selectedEmoji='🏋️',pickerCategory='All',confirmCallback=null;
+let cardioSessions=[];
 
 function checkResumeWorkout(){
   const saved=loadActiveWorkout();
@@ -3675,6 +3970,569 @@ function addScannedFood(){
   showToast(name+' logged! 📸','success');
   if(typeof navigator.vibrate==='function')navigator.vibrate(40);
 }
+
+// ═══════════════════════════════════════════
+// CARDIO TRACKER
+// ═══════════════════════════════════════════
+let cardioState='idle'; // idle | active | paused
+let cardioMode='run';   // run | cycle | walk
+let cardioStartTime=null;
+let cardioPausedTime=0;
+let cardioPauseStart=null;
+let cardioTimer=null;
+let cardioWatchId=null;
+let cardioRoute=[];     // [{lat,lng,ts,speed,accuracy}]
+let cardioLaps=[];      // [{distance,duration,pace}]
+let cardioLapStart={distance:0,time:0};
+let cardioTotalDist=0;  // metres
+let cardioCurrentSpeed=0; // m/s
+let cardioCadenceSteps=0;
+let cardioCadenceLastTime=0;
+let map=null;
+let mapPolyline=null;
+let mapMarker=null;
+let mapUserMarker=null;
+let milestonesFired=new Set();
+let currentSession=null; // completed session pending save
+
+const CARDIO_MILESTONES={
+  run:[{d:1000,icon:'🏅',text:'1 KM',sub:'Great start!'},{d:2000,icon:'💪',text:'2 KM',sub:'Finding your rhythm!'},{d:3000,icon:'🔥',text:'3 KM',sub:'On fire!'},{d:5000,icon:'⭐',text:'5 KM',sub:'5K done!'},{d:10000,icon:'🏆',text:'10 KM',sub:'Incredible!'},{d:21097,icon:'🥇',text:'HALF MARATHON',sub:'Legendary!'},{d:42195,icon:'🎖️',text:'MARATHON',sub:'You\'re a beast!'}],
+  cycle:[{d:5000,icon:'🏅',text:'5 KM',sub:'Rolling!'},{d:10000,icon:'💪',text:'10 KM',sub:'Strong legs!'},{d:20000,icon:'🔥',text:'20 KM',sub:'Crushing it!'},{d:50000,icon:'⭐',text:'50 KM',sub:'Epic ride!'},{d:100000,icon:'🏆',text:'100 KM',sub:'Century done!'}],
+  walk:[{d:1000,icon:'👟',text:'1 KM',sub:'Keep stepping!'},{d:5000,icon:'🚶',text:'5 KM',sub:'5K walk!'},{d:10000,icon:'🎯',text:'10,000 STEPS',sub:'Goal hit!'}]
+};
+
+// MET values for calorie estimation
+const METS={run:{slow:8.3,moderate:9.8,fast:12.3,vfast:16},cycle:{slow:4,moderate:8,fast:12,vfast:16},walk:{slow:2.5,moderate:3.5,fast:4.5,vfast:5.5}};
+
+function openCardioTracker(mode='run'){
+  cardioMode=mode;cardioState='idle';cardioRoute=[];cardioLaps=[];cardioLapStart={distance:0,time:0};cardioTotalDist=0;cardioCurrentSpeed=0;milestonesFired=new Set();cardioPausedTime=0;cardioPauseStart=null;
+  const el=document.getElementById('cardio-tracker');el.classList.add('open');
+  setCardioMode(mode);
+  document.getElementById('cardio-date-label').textContent=new Date().toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'});
+  const defaultNames={run:'MORNING RUN',cycle:'MORNING RIDE',walk:'MORNING WALK'};
+  const h=new Date().getHours();const prefix=h<12?'MORNING':h<17?'AFTERNOON':'EVENING';
+  document.getElementById('cardio-title-input').value=prefix+' '+(mode==='run'?'RUN':mode==='cycle'?'RIDE':'WALK');
+  resetCardioUI();
+  initMap();
+  startGPS();
+}
+
+function closeCardioTracker(){
+  if(cardioState==='active'||cardioState==='paused'){
+    showConfirm('Discard session?','Your current activity will be lost.','Discard','danger',()=>{_closeCardio()});
+  } else _closeCardio();
+}
+function _closeCardio(){
+  stopGPS();stopTimer();
+  document.getElementById('cardio-tracker').classList.remove('open');
+  cardioState='idle';map=null;mapPolyline=null;mapMarker=null;
+}
+
+function setCardioMode(mode){
+  cardioMode=mode;
+  document.querySelectorAll('.cardio-mode-btn').forEach(b=>b.classList.remove('active'));
+  const btn=document.getElementById('cardio-mode-'+mode);if(btn)btn.classList.add('active');
+  const modeLabel={run:'Min/km',cycle:'km/h',walk:'Min/km'};
+  const cadenceLabel={run:'spm',cycle:'rpm',walk:'spm'};
+  const el=document.getElementById('csc-pace-label');if(el)el.textContent=modeLabel[mode]||'Pace';
+  const cl=document.getElementById('csc-cadence-label');if(cl)cl.textContent=cadenceLabel[mode]||'Cadence';
+}
+
+function resetCardioUI(){
+  document.getElementById('cardio-big-num').innerHTML='0<span class="unit" id="cardio-big-unit">km</span>';
+  document.getElementById('cardio-big-label').textContent='DISTANCE';
+  document.getElementById('csc-time').textContent='0:00';
+  document.getElementById('csc-pace').textContent='—';
+  document.getElementById('csc-cal').textContent='0';
+  document.getElementById('csc-cadence').textContent='—';
+  document.getElementById('lap-strip').innerHTML='';
+  document.getElementById('cardio-main-btn').className='cardio-ctrl-btn start';
+  document.getElementById('cardio-main-icon').innerHTML='<polygon points="5 3 19 12 5 21 5 3"/>';
+  document.getElementById('cardio-main-label').textContent='START';
+  document.getElementById('cardio-lap-btn').style.display='none';
+  document.getElementById('cardio-stop-btn').style.display='none';
+  document.getElementById('pace-zone-badge').style.display='none';
+  document.getElementById('map-recenter-btn').style.display='none';
+}
+
+// ── GPS ──
+function startGPS(){
+  if(!navigator.geolocation){updateGPSPill('bad','No GPS');return}
+  updateGPSPill('wait','Locating…');
+  cardioWatchId=navigator.geolocation.watchPosition(onGPSUpdate,onGPSError,{enableHighAccuracy:true,maximumAge:1000,timeout:15000});
+}
+function stopGPS(){if(cardioWatchId!=null){navigator.geolocation.clearWatch(cardioWatchId);cardioWatchId=null}}
+
+function onGPSUpdate(pos){
+  const{latitude:lat,longitude:lng,accuracy,speed}=pos.coords;
+  // Update accuracy pill
+  if(accuracy<=15)updateGPSPill('good',`±${Math.round(accuracy)}m`);
+  else if(accuracy<=40)updateGPSPill('ok',`±${Math.round(accuracy)}m`);
+  else updateGPSPill('bad',`±${Math.round(accuracy)}m`);
+  // Show recenter btn once we have location
+  document.getElementById('map-recenter-btn').style.display='flex';
+  // Update map
+  updateMapPosition(lat,lng);
+  if(cardioState==='active'){
+    const ts=Date.now();
+    // Filter noisy points
+    if(accuracy>50){return}
+    const lastPt=cardioRoute[cardioRoute.length-1];
+    let dist=0;
+    if(lastPt){
+      dist=haversine(lastPt.lat,lastPt.lng,lat,lng);
+      // Sanity check: ignore points > 50m/s (GPS glitch)
+      const dt=(ts-lastPt.ts)/1000;
+      if(dt>0&&dist/dt>50)return;
+    }
+    cardioRoute.push({lat,lng,ts,speed:speed||0,accuracy});
+    if(lastPt&&dist>1){
+      cardioTotalDist+=dist;
+      if(speed!=null)cardioCurrentSpeed=speed;
+      else if(lastPt){
+        const dt=(ts-lastPt.ts)/1000;
+        cardioCurrentSpeed=dt>0?dist/dt:cardioCurrentSpeed;
+      }
+      drawRouteOnMap();
+      checkMilestones();
+    }
+  }
+}
+function onGPSError(err){updateGPSPill('bad','GPS error')}
+function updateGPSPill(status,text){
+  const dot=document.getElementById('gps-dot');const lbl=document.getElementById('gps-label');
+  if(dot)dot.className='gps-dot '+status;if(lbl)lbl.textContent=text;
+}
+
+// ── MAP (Leaflet via CDN) ──
+function initMap(){
+  const mapEl=document.getElementById('cardio-map');
+  if(!mapEl)return;
+  mapEl.innerHTML='';
+  // Load Leaflet dynamically
+  if(!window.L){
+    const css=document.createElement('link');css.rel='stylesheet';css.href='https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css';document.head.appendChild(css);
+    const script=document.createElement('script');script.src='https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js';
+    script.onload=()=>initLeafletMap();document.head.appendChild(script);
+  } else {
+    initLeafletMap();
+  }
+}
+
+function initLeafletMap(){
+  if(!window.L)return;
+  const mapEl=document.getElementById('cardio-map');if(!mapEl)return;
+  const loadMsg=document.getElementById('map-loading-msg');if(loadMsg)loadMsg.style.display='none';
+  map=L.map('cardio-map',{zoomControl:false,attributionControl:false}).setView([51.5074,-0.1278],14);
+  // Dark tile layer
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{maxZoom:19}).addTo(map);
+  // Route polyline
+  mapPolyline=L.polyline([],{color:'#e8f020',weight:4,opacity:.9}).addTo(map);
+  // User position marker
+  const markerIcon=L.divIcon({html:`<div style="width:14px;height:14px;border-radius:50%;background:#e8f020;border:3px solid #fff;box-shadow:0 0 10px rgba(232,240,32,.6)"></div>`,iconSize:[14,14],iconAnchor:[7,7],className:''});
+  mapUserMarker=L.marker([51.5074,-0.1278],{icon:markerIcon}).addTo(map);
+  // Try to get current position to center map
+  navigator.geolocation.getCurrentPosition(pos=>{
+    const{latitude:lat,longitude:lng}=pos.coords;
+    map.setView([lat,lng],16);
+    mapUserMarker.setLatLng([lat,lng]);
+  },()=>{},{enableHighAccuracy:true,timeout:5000});
+}
+
+function updateMapPosition(lat,lng){
+  if(!map||!window.L)return;
+  mapUserMarker?.setLatLng([lat,lng]);
+}
+
+function drawRouteOnMap(){
+  if(!map||!mapPolyline||!cardioRoute.length)return;
+  const latlngs=cardioRoute.map(p=>[p.lat,p.lng]);
+  mapPolyline.setLatLngs(latlngs);
+  const last=cardioRoute[cardioRoute.length-1];
+  mapUserMarker?.setLatLng([last.lat,last.lng]);
+  if(autoCenter)map.panTo([last.lat,last.lng],{animate:true,duration:.5});
+}
+
+let autoCenter=true;
+function recenterMap(){
+  autoCenter=true;
+  if(cardioRoute.length){const last=cardioRoute[cardioRoute.length-1];map?.panTo([last.lat,last.lng])}
+}
+
+map?.on('dragstart',()=>{autoCenter=false});
+
+// ── TIMER / CORE ──
+function cardioMainAction(){
+  if(cardioState==='idle')startCardio();
+  else if(cardioState==='active')pauseCardio();
+  else if(cardioState==='paused')resumeCardio();
+}
+
+function startCardio(){
+  cardioState='active';cardioStartTime=Date.now();cardioPausedTime=0;
+  startTimer();
+  const btn=document.getElementById('cardio-main-btn');
+  btn.className='cardio-ctrl-btn pause';
+  document.getElementById('cardio-main-icon').innerHTML='<rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/>';
+  document.getElementById('cardio-main-label').textContent='PAUSE';
+  document.getElementById('cardio-lap-btn').style.display='flex';
+  document.getElementById('cardio-stop-btn').style.display='flex';
+  document.getElementById('cardio-back-btn').style.display='none';
+  if(typeof navigator.vibrate==='function')navigator.vibrate([100,50,100]);
+  showToast('Activity started! 🏃','success');
+}
+
+function pauseCardio(){
+  cardioState='paused';cardioPauseStart=Date.now();stopTimer();
+  const btn=document.getElementById('cardio-main-btn');
+  btn.className='cardio-ctrl-btn resume';
+  document.getElementById('cardio-main-icon').innerHTML='<polygon points="5 3 19 12 5 21 5 3"/>';
+  document.getElementById('cardio-main-label').textContent='RESUME';
+  if(typeof navigator.vibrate==='function')navigator.vibrate(80);
+}
+
+function resumeCardio(){
+  cardioPausedTime+=(Date.now()-cardioPauseStart);cardioPauseStart=null;
+  cardioState='active';startTimer();
+  const btn=document.getElementById('cardio-main-btn');
+  btn.className='cardio-ctrl-btn pause';
+  document.getElementById('cardio-main-icon').innerHTML='<rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/>';
+  document.getElementById('cardio-main-label').textContent='PAUSE';
+  if(typeof navigator.vibrate==='function')navigator.vibrate([50,30,50]);
+}
+
+function stopCardio(){
+  showConfirm('Finish Activity?','Save this session to your log?','Finish','primary',()=>{
+    pauseCardio();stopTimer();stopGPS();
+    buildCardioSummary();
+  });
+}
+
+function startTimer(){cardioTimer=setInterval(updateCardioUI,1000)}
+function stopTimer(){clearInterval(cardioTimer);cardioTimer=null}
+
+function getElapsedMs(){
+  if(!cardioStartTime)return 0;
+  const now=Date.now();
+  const paused=cardioPausedTime+(cardioPauseStart?now-cardioPauseStart:0);
+  return now-cardioStartTime-paused;
+}
+
+function updateCardioUI(){
+  const elapsedMs=getElapsedMs();
+  const elapsedSec=elapsedMs/1000;
+  const distKm=cardioTotalDist/1000;
+  // Big number = distance
+  const bigEl=document.getElementById('cardio-big-num');
+  if(bigEl)bigEl.innerHTML=distKm.toFixed(2)+'<span class="unit" id="cardio-big-unit">km</span>';
+  // Time
+  document.getElementById('csc-time').textContent=fmtDuration(elapsedSec);
+  // Pace / speed
+  const paceEl=document.getElementById('csc-pace');
+  if(cardioMode==='cycle'){
+    const kph=cardioCurrentSpeed*3.6;
+    if(paceEl)paceEl.textContent=kph>0?kph.toFixed(1):'—';
+  } else {
+    if(cardioTotalDist>50&&elapsedSec>5){
+      const paceSecPerKm=(elapsedSec/(cardioTotalDist/1000));
+      if(paceEl)paceEl.textContent=fmtPace(paceSecPerKm);
+    } else {if(paceEl)paceEl.textContent='—'}
+  }
+  // Calories
+  const cals=estimateCalories(cardioTotalDist,elapsedSec,cardioMode);
+  document.getElementById('csc-cal').textContent=Math.round(cals);
+  // Cadence estimate (approximation from steps)
+  if(cardioMode==='run'||cardioMode==='walk'){
+    const stepRate=cardioCurrentSpeed>0?Math.round(cardioCurrentSpeed*180/3):0;
+    document.getElementById('csc-cadence').textContent=stepRate>0?stepRate:'—';
+  } else {
+    const rpm=cardioCurrentSpeed>0?Math.round(cardioCurrentSpeed*60/6):0;
+    document.getElementById('csc-cadence').textContent=rpm>0?rpm:'—';
+  }
+  // Pace zone
+  updatePaceZone();
+}
+
+function updatePaceZone(){
+  if(cardioCurrentSpeed<0.3){document.getElementById('pace-zone-badge').style.display='none';return}
+  document.getElementById('pace-zone-badge').style.display='block';
+  const mps=cardioCurrentSpeed;
+  let zone,name,label,cls;
+  if(cardioMode==='run'){
+    if(mps<2.2){zone=1;name='Zone 1';label='Recovery';cls='zone-z1'}
+    else if(mps<3.0){zone=2;name='Zone 2';label='Aerobic';cls='zone-z2'}
+    else if(mps<3.8){zone=3;name='Zone 3';label='Tempo';cls='zone-z3'}
+    else if(mps<4.5){zone=4;name='Zone 4';label='Threshold';cls='zone-z4'}
+    else{zone=5;name='Zone 5';label='VO2 Max';cls='zone-z5'}
+  } else if(cardioMode==='cycle'){
+    const kph=mps*3.6;
+    if(kph<15){zone=1;name='Easy';label='Recovery';cls='zone-z1'}
+    else if(kph<25){zone=2;name='Moderate';label='Aerobic';cls='zone-z2'}
+    else if(kph<32){zone=3;name='Brisk';label='Tempo';cls='zone-z3'}
+    else if(kph<40){zone=4;name='Hard';label='Threshold';cls='zone-z4'}
+    else{zone=5;name='Race Pace';label='VO2 Max';cls='zone-z5'}
+  } else {
+    if(mps<1.1){zone=1;name='Stroll';label='Easy';cls='zone-z1'}
+    else if(mps<1.5){zone=2;name='Brisk Walk';label='Active';cls='zone-z2'}
+    else{zone=3;name='Power Walk';label='Vigorous';cls='zone-z3'}
+  }
+  const badge=document.getElementById('pace-zone-badge');
+  badge.className=`pace-zone-badge ${cls}`;
+  document.getElementById('pace-zone-name').textContent=name;
+  document.getElementById('pace-zone-label').textContent=label;
+}
+
+function markLap(){
+  const elapsedMs=getElapsedMs();
+  const elapsedSec=elapsedMs/1000;
+  const lapDist=cardioTotalDist-cardioLapStart.distance;
+  const lapTime=elapsedSec-cardioLapStart.time;
+  const lapPace=lapDist>0?lapTime/(lapDist/1000):0;
+  cardioLaps.push({number:cardioLaps.length+1,distance:lapDist,duration:lapTime,pace:lapPace});
+  cardioLapStart={distance:cardioTotalDist,time:elapsedSec};
+  renderLapStrip();
+  if(typeof navigator.vibrate==='function')navigator.vibrate([50,30,100,30,50]);
+  showToast('Lap '+(cardioLaps.length)+' — '+fmtPace(lapPace)+'/km','success');
+}
+
+function renderLapStrip(){
+  const strip=document.getElementById('lap-strip');if(!strip)return;
+  strip.innerHTML='';
+  const elapsedSec=getElapsedMs()/1000;
+  const curLapDist=cardioTotalDist-cardioLapStart.distance;
+  const curLapTime=elapsedSec-cardioLapStart.time;
+  // Show last 5 laps + current
+  const recent=cardioLaps.slice(-5);
+  recent.forEach(lap=>{
+    const chip=document.createElement('div');chip.className='lap-chip';
+    chip.innerHTML=`<div class="lap-chip-num">Lap ${lap.number}</div><div class="lap-chip-time">${fmtDuration(lap.duration)}</div><div class="lap-chip-pace">${fmtPace(lap.pace)}/km</div>`;
+    strip.appendChild(chip);
+  });
+  // Current lap
+  const curChip=document.createElement('div');curChip.className='lap-chip current';
+  const curPace=curLapDist>50?curLapTime/(curLapDist/1000):0;
+  curChip.innerHTML=`<div class="lap-chip-num">Current</div><div class="lap-chip-time">${fmtDuration(curLapTime)}</div><div class="lap-chip-pace">${curPace>0?fmtPace(curPace)+'/km':'—'}</div>`;
+  strip.appendChild(curChip);
+  strip.scrollLeft=strip.scrollWidth;
+}
+
+// ── MILESTONES ──
+function checkMilestones(){
+  const milestones=CARDIO_MILESTONES[cardioMode]||[];
+  milestones.forEach(m=>{
+    if(!milestonesFired.has(m.d)&&cardioTotalDist>=m.d){
+      milestonesFired.add(m.d);
+      showMilestone(m.icon,m.text,m.sub);
+    }
+  });
+}
+
+function showMilestone(icon,text,sub){
+  const toast=document.getElementById('milestone-toast');
+  document.getElementById('milestone-icon').textContent=icon;
+  document.getElementById('milestone-text').textContent=text;
+  document.getElementById('milestone-sub').textContent=sub;
+  toast.classList.add('show');
+  if(typeof navigator.vibrate==='function')navigator.vibrate([200,100,200,100,400]);
+  setTimeout(()=>{toast.classList.remove('show');toast.classList.add('hide');setTimeout(()=>toast.classList.remove('hide'),400)},3500);
+}
+
+// ── CALORIE CALCULATION ──
+function estimateCalories(distM,durationSec,mode){
+  const weightKg=bodyWeightLog.length?bodyWeightLog[bodyWeightLog.length-1].weight:75;
+  const ageYears=userProfile?.age||30;
+  const speedMps=distM/Math.max(durationSec,1);
+  const speedKph=speedMps*3.6;
+  let met;
+  if(mode==='run'){
+    if(speedKph<8)met=8.3;else if(speedKph<10)met=9.8;else if(speedKph<13)met=12.3;else met=16;
+  } else if(mode==='cycle'){
+    if(speedKph<15)met=4;else if(speedKph<20)met=8;else if(speedKph<28)met=12;else met=16;
+  } else {
+    if(speedKph<4)met=2.5;else if(speedKph<5)met=3.5;else met=4.5;
+  }
+  // Mifflin-St Jeor adjustment for age
+  const ageFactor=1+(Math.max(0,ageYears-30)*0.005);
+  return(met*weightKg*(durationSec/3600))/ageFactor;
+}
+
+// EPOC (afterburn) estimation — Børg 1987 / simplified
+function estimateEPOC(calories,mode,durationMin){
+  // EPOC is typically 6-15% of calories for moderate-intensity cardio
+  const intensity=mode==='run'?0.12:mode==='cycle'?0.08:0.05;
+  const durationBonus=durationMin>30?1.2:1;
+  return Math.round(calories*intensity*durationBonus);
+}
+
+// ── SUMMARY ──
+function buildCardioSummary(){
+  const elapsedMs=getElapsedMs();const elapsedSec=elapsedMs/1000;
+  const distKm=cardioTotalDist/1000;
+  const cals=estimateCalories(cardioTotalDist,elapsedSec,cardioMode);
+  const durationMin=elapsedSec/60;
+  const epoc=estimateEPOC(cals,cardioMode,durationMin);
+  const avgPace=distKm>0?elapsedSec/distKm:0;
+  const avgSpeed=(elapsedSec>0?distKm/(elapsedSec/3600):0);
+  const maxSpeed=cardioRoute.length?Math.max(...cardioRoute.map(p=>p.speed||0))*3.6:0;
+  const title=document.getElementById('cardio-title-input')?.value||'Activity';
+  currentSession={id:'c'+Date.now(),mode:cardioMode,title,date:new Date().toISOString(),route:cardioRoute,laps:cardioLaps,distance:cardioTotalDist,duration:elapsedSec,calories:Math.round(cals),epoc,avgPace,avgSpeed,maxSpeed};
+
+  // Build summary UI
+  const icons={run:'🏃',cycle:'🚴',walk:'🚶'};
+  const titles={run:'RUN COMPLETE',cycle:'RIDE COMPLETE',walk:'WALK COMPLETE'};
+  document.getElementById('sum-mode-icon').textContent=icons[cardioMode]||'🏅';
+  document.getElementById('sum-title').textContent=titles[cardioMode]||'COMPLETE';
+  document.getElementById('sum-date').textContent=new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
+
+  // Stats grid
+  const statsGrid=document.getElementById('sum-stats-grid');
+  statsGrid.innerHTML=`
+    <div class="cardio-sum-stat"><div class="css-val">${distKm.toFixed(2)}</div><div class="css-label">km</div></div>
+    <div class="cardio-sum-stat"><div class="css-val">${fmtDuration(elapsedSec)}</div><div class="css-label">Duration</div></div>
+    <div class="cardio-sum-stat"><div class="css-val">${Math.round(cals)}</div><div class="css-label">Calories</div></div>
+    <div class="cardio-sum-stat"><div class="css-val">${cardioMode==='cycle'?avgSpeed.toFixed(1)+'kph':fmtPace(avgPace)}</div><div class="css-label">Avg ${cardioMode==='cycle'?'Speed':'Pace'}</div></div>`;
+
+  // Route mini-map
+  drawStaticRoute();
+
+  // Afterburn
+  if(epoc>0){
+    document.getElementById('sum-afterburn').style.display='block';
+    document.getElementById('sum-afterburn-val').textContent=epoc;
+    const weightKg=bodyWeightLog.length?bodyWeightLog[bodyWeightLog.length-1].weight:75;
+    const age=userProfile?.age||30;
+    document.getElementById('sum-afterburn-sub').textContent=`Based on ${age}yo, ${weightKg}kg. Your body will continue burning ~${epoc} extra kcal over the next 12–24 hours (EPOC effect).`;
+  }
+
+  // Laps
+  if(cardioLaps.length>0){
+    document.getElementById('sum-laps-section').style.display='block';
+    const bestLap=cardioLaps.reduce((b,l)=>l.pace<b.pace?l:b,cardioLaps[0]);
+    const table=document.getElementById('sum-lap-table');
+    table.innerHTML=`<tr><th>Lap</th><th>Dist</th><th>Time</th><th>Pace</th></tr>`;
+    cardioLaps.forEach(lap=>{
+      const tr=document.createElement('tr');const isBest=lap===bestLap;
+      tr.innerHTML=`<td class="${isBest?'lap-best':''}">${lap.number}${isBest?' ★':''}</td><td>${(lap.distance/1000).toFixed(2)}km</td><td>${fmtDuration(lap.duration)}</td><td class="${isBest?'lap-best':''}">${fmtPace(lap.pace)}/km</td>`;
+      table.appendChild(tr);
+    });
+  }
+
+  // Details
+  document.getElementById('sum-details').innerHTML=`
+    <div class="cardio-sum-row"><span class="cardio-sum-key">Activity</span><span class="cardio-sum-val">${title}</span></div>
+    <div class="cardio-sum-row"><span class="cardio-sum-key">Mode</span><span class="cardio-sum-val">${cardioMode.charAt(0).toUpperCase()+cardioMode.slice(1)}</span></div>
+    ${maxSpeed>0?`<div class="cardio-sum-row"><span class="cardio-sum-key">Max Speed</span><span class="cardio-sum-val">${maxSpeed.toFixed(1)} km/h</span></div>`:''}
+    <div class="cardio-sum-row"><span class="cardio-sum-key">GPS Points</span><span class="cardio-sum-val">${cardioRoute.length}</span></div>
+    <div class="cardio-sum-row"><span class="cardio-sum-key">Afterburn</span><span class="cardio-sum-val">+${epoc} kcal (est.)</span></div>`;
+
+  // Show summary screen
+  document.getElementById('cardio-tracker').classList.remove('open');
+  document.getElementById('cardio-summary').classList.add('open');
+
+  // AI insight async
+  loadCardioAIInsight(currentSession);
+}
+
+function drawStaticRoute(){
+  if(!cardioRoute.length){
+    document.getElementById('sum-route-map').innerHTML='<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--text3);font-weight:600">No route data</div>';
+    return;
+  }
+  const canvas=document.getElementById('sum-route-canvas');if(!canvas)return;
+  const W=canvas.parentElement.offsetWidth||300,H=200;
+  canvas.width=W;canvas.height=H;
+  const ctx=canvas.getContext('2d');
+  ctx.fillStyle='#0d1117';ctx.fillRect(0,0,W,H);
+  const lats=cardioRoute.map(p=>p.lat);const lngs=cardioRoute.map(p=>p.lng);
+  const minLat=Math.min(...lats);const maxLat=Math.max(...lats);
+  const minLng=Math.min(...lngs);const maxLng=Math.max(...lngs);
+  const pad=20;
+  const toX=lng=>pad+(lng-minLng)/(maxLng-minLng||1)*(W-pad*2);
+  const toY=lat=>pad+(maxLat-lat)/(maxLat-minLat||1)*(H-pad*2);
+  // Draw route
+  ctx.beginPath();ctx.strokeStyle='#e8f020';ctx.lineWidth=2.5;ctx.lineCap='round';ctx.lineJoin='round';
+  cardioRoute.forEach((p,i)=>{if(i===0)ctx.moveTo(toX(p.lng),toY(p.lat));else ctx.lineTo(toX(p.lng),toY(p.lat))});
+  ctx.stroke();
+  // Start dot
+  const sp=cardioRoute[0];ctx.fillStyle='#20e880';ctx.beginPath();ctx.arc(toX(sp.lng),toY(sp.lat),5,0,Math.PI*2);ctx.fill();
+  // End dot
+  const ep=cardioRoute[cardioRoute.length-1];ctx.fillStyle='#ff4060';ctx.beginPath();ctx.arc(toX(ep.lng),toY(ep.lat),5,0,Math.PI*2);ctx.fill();
+}
+
+async function loadCardioAIInsight(session){
+  if(!userProfile)return;
+  const aiCard=document.getElementById('sum-ai-card');const aiText=document.getElementById('sum-ai-text');
+  if(!aiCard||!aiText)return;
+  aiCard.style.display='block';aiText.innerHTML='<div class="chat-typing"><span></span><span></span><span></span></div>';
+  const distKm=(session.distance/1000).toFixed(2);
+  const mode=session.mode;
+  const avgPace=mode!=='cycle'?fmtPace(session.avgPace)+'min/km':session.avgSpeed.toFixed(1)+'km/h avg';
+  const prompt=`Give a concise, motivating 2-sentence AI coaching insight for this ${mode} session. Be specific and data-driven.
+Profile: ${userProfile.age}yo ${userProfile.sex}, ${userProfile.level}, goal: ${userProfile.goal}.
+Session: ${distKm}km, ${fmtDuration(session.duration)}, ${avgPace}, ${session.calories}kcal burned, ${session.laps.length} laps.
+Recent sessions: ${cardioSessions.slice(-3).map(s=>`${(s.distance/1000).toFixed(1)}km ${s.mode}`).join(', ')||'First session'}.
+Keep it under 60 words. Use **bold** for key metrics. Be positive and specific.`;
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:150,messages:[{role:'user',content:prompt}]})});
+    const d=await r.json();const txt=d.content?.find(b=>b.type==='text')?.text||'Great session!';
+    aiText.innerHTML=txt.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>');
+  }catch(e){aiCard.style.display='none'}
+}
+
+function saveCardioSession(){
+  if(!currentSession)return;
+  cardioSessions.push(currentSession);
+  saveCardioDB();
+  document.getElementById('cardio-summary').classList.remove('open');
+  currentSession=null;cardioState='idle';
+  showToast('Activity saved! 🎉','success');
+  renderToday();
+  if(typeof navigator.vibrate==='function')navigator.vibrate([100,50,200]);
+}
+function discardCardioSession(){
+  showConfirm('Discard Session?','This activity will not be saved.','Discard','danger',()=>{
+    document.getElementById('cardio-summary').classList.remove('open');currentSession=null;cardioState='idle';
+  });
+}
+
+// ── CARDIO HISTORY (on Today page) ──
+function renderCardioHistoryOnToday(){
+  const recent=cardioSessions.slice(-3).reverse();
+  const el=document.getElementById('recent-workouts');
+  if(!el)return;
+  if(recent.length){
+    const header=document.createElement('div');header.className='section-label';header.style.marginTop='8px';header.innerHTML='<span>Recent Activities</span>';el.prepend(header);
+    recent.forEach(s=>{
+      const icons={run:'🏃',cycle:'🚴',walk:'🚶'};
+      const card=document.createElement('div');card.className='cardio-history-card';
+      const d=new Date(s.date).toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'});
+      card.innerHTML=`<div class="chc-header"><div class="chc-mode-icon">${icons[s.mode]||'🏅'}</div><div class="chc-info"><div class="chc-name">${s.title||s.mode}</div><div class="chc-date">${d}</div></div></div>
+        <div class="chc-stats">
+          <div class="chc-stat"><div class="chc-stat-val">${(s.distance/1000).toFixed(1)}</div><div class="chc-stat-label">km</div></div>
+          <div class="chc-stat"><div class="chc-stat-val">${fmtDuration(s.duration)}</div><div class="chc-stat-label">Time</div></div>
+          <div class="chc-stat"><div class="chc-stat-val">${s.calories}</div><div class="chc-stat-label">kcal</div></div>
+          ${s.mode!=='cycle'&&s.avgPace?`<div class="chc-stat"><div class="chc-stat-val">${fmtPace(s.avgPace)}</div><div class="chc-stat-label">Min/km</div></div>`:''}
+        </div>`;
+      el.prepend(card);
+    });
+  }
+  // Update QL sub labels
+  const runs=cardioSessions.filter(s=>s.mode==='run');
+  const cycles=cardioSessions.filter(s=>s.mode==='cycle');
+  const qlRun=document.getElementById('ql-run-stat');
+  const qlCycle=document.getElementById('ql-cycle-stat');
+  if(qlRun&&runs.length){const last=runs[runs.length-1];qlRun.textContent=`Last: ${(last.distance/1000).toFixed(1)}km`;}
+  if(qlCycle&&cycles.length){const last=cycles[cycles.length-1];qlCycle.textContent=`Last: ${(last.distance/1000).toFixed(1)}km`;}
+}
+
+// ── HELPERS ──
+function haversine(lat1,lon1,lat2,lon2){
+  const R=6371000,dLat=(lat2-lat1)*Math.PI/180,dLon=(lon2-lon1)*Math.PI/180;
+  const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
+  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+function fmtPace(secPerKm){if(!secPerKm||secPerKm<=0||secPerKm>3600)return'—';const m=Math.floor(secPerKm/60);const s=Math.round(secPerKm%60);return m+':'+(s<10?'0':'')+s}
+function fmtDuration(sec){const m=Math.floor(sec/60);if(m<60)return m+':'+(Math.round(sec%60)<10?'0':'')+Math.round(sec%60);return Math.floor(m/60)+'h '+(m%60)+'m'}
 
 // ─ INIT ─
 document.getElementById('app').style.display='none';
