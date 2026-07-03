@@ -103,13 +103,221 @@ b,strong{color:var(--bold-color);font-weight:700}
 .user-name{font-size:13px;font-weight:700;color:#ffffff;flex:1}
 .user-last{font-size:10px;color:var(--text3);font-family:'DM Mono',monospace}
 
-/* ─── BOTTOM NAV ─── */
-.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:rgba(10,10,15,.97);backdrop-filter:blur(20px);border-top:1px solid var(--border);display:flex;padding-bottom:var(--safe-bottom);z-index:100}
-.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 4px;background:none;border:none;color:var(--text3);font-family:'DM Sans',sans-serif;font-size:9px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;transition:color .2s;-webkit-tap-highlight-color:transparent;position:relative}
+/* ─── BOTTOM NAV — 4 tabs + FAB ─── */
+.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:rgba(10,10,15,.97);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-top:1px solid var(--border);display:grid;grid-template-columns:1fr 1fr 80px 1fr 1fr;padding-bottom:var(--safe-bottom);z-index:100;align-items:end}
+.nav-btn{display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 4px 8px;background:none;border:none;color:var(--text3);font-family:'DM Sans',sans-serif;font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;transition:color .2s;-webkit-tap-highlight-color:transparent;position:relative}
 .nav-btn.active{color:var(--accent)}
-.nav-btn svg{width:22px;height:22px}
-.nav-dot{position:absolute;top:8px;right:calc(50% - 14px);width:6px;height:6px;border-radius:50%;background:var(--accent);display:none}
+.nav-btn svg{width:22px;height:22px;transition:transform .2s}
+.nav-btn.active svg{transform:scale(1.12)}
+.nav-dot{position:absolute;top:8px;right:calc(50% - 12px);width:6px;height:6px;border-radius:50%;background:var(--accent);display:none}
 .nav-dot.show{display:block}
+
+/* FAB — centre action button */
+.nav-fab-wrap{display:flex;align-items:center;justify-content:center;padding-bottom:4px;position:relative}
+.nav-fab{width:58px;height:58px;border-radius:50%;background:var(--accent);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(232,240,32,.45);-webkit-tap-highlight-color:transparent;transition:transform .15s,box-shadow .15s;margin-top:-20px}
+.nav-fab:active{transform:scale(.93);box-shadow:0 2px 10px rgba(232,240,32,.3)}
+.nav-fab svg{width:26px;height:26px;color:#0a0a0f}
+
+/* Activity launcher sheet */
+#activity-sheet{display:none;position:fixed;inset:0;z-index:200;max-width:480px;margin:0 auto;left:50%;transform:translateX(-50%);width:100%}
+#activity-sheet.open{display:block}
+.activity-sheet-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+.activity-sheet-panel{position:absolute;bottom:0;left:0;right:0;background:var(--bg2);border-radius:24px 24px 0 0;border-top:1px solid var(--border);padding-bottom:calc(32px + var(--safe-bottom));animation:sheetUp .32s cubic-bezier(.32,0,.67,0)}
+.activity-sheet-handle{width:36px;height:4px;background:var(--border2);border-radius:2px;margin:12px auto 0}
+.activity-sheet-title{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:.04em;color:#fff;padding:16px 20px 12px;display:flex;align-items:center;justify-content:space-between}
+.activity-sheet-close{background:var(--bg3);border:1px solid var(--border);border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text3);-webkit-tap-highlight-color:transparent}
+.activity-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;padding:0 16px 16px}
+.activity-tile{background:var(--bg3);border:1px solid var(--border);border-radius:16px;padding:18px 10px 14px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:all .15s;position:relative;overflow:hidden}
+.activity-tile:active{transform:scale(.96);border-color:var(--border2)}
+.activity-tile.primary{background:linear-gradient(135deg,rgba(232,240,32,.15),rgba(232,240,32,.05));border-color:rgba(232,240,32,.3)}
+.activity-tile.cardio-run{background:linear-gradient(135deg,rgba(32,232,128,.1),rgba(32,232,128,.03));border-color:rgba(32,232,128,.25)}
+.activity-tile.cardio-cycle{background:linear-gradient(135deg,rgba(64,143,255,.1),rgba(64,143,255,.03));border-color:rgba(64,143,255,.25)}
+.activity-tile.cardio-walk{background:linear-gradient(135deg,rgba(167,139,250,.1),rgba(167,139,250,.03));border-color:rgba(167,139,250,.25)}
+.activity-tile.nutrition-tile{background:linear-gradient(135deg,rgba(255,144,32,.1),rgba(255,144,32,.03));border-color:rgba(255,144,32,.25)}
+.activity-tile.body-tile{background:linear-gradient(135deg,rgba(255,64,96,.1),rgba(255,64,96,.03));border-color:rgba(255,64,96,.25)}
+.activity-tile-icon{font-size:30px;line-height:1}
+.activity-tile-label{font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:.05em;color:#fff;text-align:center;line-height:1.2}
+.activity-tile-sub{font-size:9px;color:var(--text3);font-family:'DM Mono',monospace;font-weight:700;text-align:center;margin-top:-2px}
+.activity-tile-last{position:absolute;top:6px;right:6px;background:rgba(232,240,32,.12);border-radius:4px;padding:1px 5px;font-size:8px;color:var(--accent);font-family:'DM Mono',monospace;font-weight:700}
+
+/* ─── TODAY DASHBOARD ─── */
+.dashboard-header{padding:52px 20px 16px;background:var(--bg);position:sticky;top:0;z-index:10;border-bottom:1px solid var(--border)}
+.dash-greeting{display:flex;align-items:center;justify-content:space-between}
+.dash-greeting-text h1{font-family:'Bebas Neue',sans-serif;font-size:28px;color:#fff;letter-spacing:.03em;line-height:1}
+.dash-greeting-text p{font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;font-weight:700;margin-top:2px}
+.dash-avatar-btn{width:40px;height:40px;border-radius:50%;background:var(--accent);border:none;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--bg);cursor:pointer;-webkit-tap-highlight-color:transparent;flex-shrink:0}
+
+/* Quick action row */
+.quick-action-row{display:flex;gap:8px;padding:14px 16px 0;overflow-x:auto;scrollbar-width:none}
+.quick-action-row::-webkit-scrollbar{display:none}
+.qa-pill{flex-shrink:0;display:flex;align-items:center;gap:6px;background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:8px 14px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:all .15s}
+.qa-pill:active{border-color:var(--accent);background:var(--accent-dim)}
+.qa-pill svg{width:14px;height:14px}
+.qa-pill span{font-size:12px;font-weight:700;color:var(--text2);white-space:nowrap}
+.qa-pill.gym svg{color:var(--accent)}
+.qa-pill.run svg{color:var(--green)}
+.qa-pill.cycle svg{color:var(--blue)}
+.qa-pill.food svg{color:var(--orange)}
+.qa-pill.body svg{color:var(--red)}
+
+/* Dashboard cards */
+.dash-section{padding:16px 16px 0}
+.dash-section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.dash-section-title{font-family:'Bebas Neue',sans-serif;font-size:17px;color:#fff;letter-spacing:.04em}
+.dash-section-action{font-size:11px;color:var(--accent);font-weight:700;cursor:pointer;font-family:'DM Mono',monospace}
+
+/* ─── CARDIO TRACKER (rebuilt) ─── */
+#cardio-tracker{display:none;position:fixed;inset:0;z-index:250;flex-direction:column;background:#000;max-width:480px;margin:0 auto;left:50%;transform:translateX(-50%);width:100%}
+#cardio-tracker.open{display:flex}
+
+/* Full-bleed map */
+#cardio-map-wrap{position:absolute;inset:0;z-index:1}
+#cardio-map{width:100%;height:100%}
+
+/* Floating topbar over map */
+.ct-topbar{position:absolute;top:0;left:0;right:0;z-index:20;padding:calc(48px + env(safe-area-inset-top,0px)) 16px 12px;background:linear-gradient(180deg,rgba(0,0,0,.75) 0%,transparent 100%);display:flex;align-items:center;gap:10px;pointer-events:none}
+.ct-topbar>*{pointer-events:auto}
+.ct-back{width:38px;height:38px;border-radius:50%;background:rgba(0,0,0,.55);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;cursor:pointer;color:#fff;-webkit-tap-highlight-color:transparent;flex-shrink:0}
+.ct-back:active{background:rgba(255,64,96,.4)}
+.ct-title-input{flex:1;background:none;border:none;font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:.04em;color:#fff;outline:none;text-shadow:0 1px 4px rgba(0,0,0,.6)}
+.ct-mode-pills{display:flex;gap:6px;position:absolute;top:calc(env(safe-area-inset-top,0px) + 96px);left:16px;right:16px;z-index:20;justify-content:center}
+.ct-mode-pill{background:rgba(0,0,0,.55);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.15);border-radius:20px;padding:6px 14px;font-size:12px;font-weight:700;color:rgba(255,255,255,.7);cursor:pointer;-webkit-tap-highlight-color:transparent;display:flex;align-items:center;gap:5px;white-space:nowrap;transition:all .2s}
+.ct-mode-pill.active{border-color:rgba(232,240,32,.7);color:var(--accent);background:rgba(232,240,32,.12)}
+.ct-mode-pill svg{width:14px;height:14px}
+
+/* GPS + Zone floating pills */
+.ct-floating-pills{position:absolute;bottom:calc(260px + env(safe-area-inset-bottom,0px));left:16px;right:16px;z-index:20;display:flex;justify-content:space-between;align-items:flex-end;pointer-events:none}
+.ct-gps-pill{background:rgba(0,0,0,.65);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.15);border-radius:20px;padding:5px 12px;font-size:10px;font-family:'DM Mono',monospace;font-weight:700;display:flex;align-items:center;gap:6px;color:#fff}
+.gps-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.gps-dot.searching{background:var(--orange);animation:gpsPulse 1s ease-in-out infinite}
+.gps-dot.good{background:var(--green);box-shadow:0 0 8px rgba(32,232,128,.8)}
+.gps-dot.ok{background:var(--orange)}
+.gps-dot.poor{background:var(--red)}
+@keyframes gpsPulse{0%,100%{opacity:.4;transform:scale(.8)}50%{opacity:1;transform:scale(1)}}
+.ct-zone-pill{border-radius:8px;padding:6px 10px;font-size:11px;font-family:'DM Mono',monospace;font-weight:700;text-align:center;display:none;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.ct-zone-pill.show{display:block}
+.zone-z1{background:rgba(64,143,255,.35);color:#93c5fd;border:1px solid rgba(64,143,255,.5)}
+.zone-z2{background:rgba(32,232,128,.35);color:#6ee7b7;border:1px solid rgba(32,232,128,.5)}
+.zone-z3{background:rgba(232,240,32,.35);color:var(--accent);border:1px solid rgba(232,240,32,.5)}
+.zone-z4{background:rgba(255,144,32,.35);color:#fdba74;border:1px solid rgba(255,144,32,.5)}
+.zone-z5{background:rgba(255,64,96,.35);color:#fca5a5;border:1px solid rgba(255,64,96,.5)}
+
+/* Recenter FAB */
+.ct-recenter{position:absolute;right:16px;bottom:calc(284px + env(safe-area-inset-bottom,0px));z-index:20;width:42px;height:42px;background:rgba(0,0,0,.65);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.2);border-radius:50%;display:none;align-items:center;justify-content:center;cursor:pointer;color:#fff;-webkit-tap-highlight-color:transparent;box-shadow:0 2px 12px rgba(0,0,0,.4)}
+.ct-recenter.show{display:flex}
+.ct-recenter:active{background:rgba(232,240,32,.3);border-color:var(--accent)}
+.ct-recenter svg{width:18px;height:18px}
+
+/* Bottom stats panel — floats over map */
+.ct-stats{position:absolute;bottom:0;left:0;right:0;z-index:20;background:rgba(5,5,10,.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid rgba(255,255,255,.1);padding:16px 16px calc(16px + env(safe-area-inset-bottom,0px))}
+
+/* Primary big metric */
+.ct-primary{text-align:center;margin-bottom:12px;cursor:pointer;user-select:none;-webkit-user-select:none}
+.ct-big-val{font-family:'Bebas Neue',sans-serif;font-size:80px;line-height:.9;color:#fff;letter-spacing:-.02em}
+.ct-big-unit{font-size:22px;color:rgba(255,255,255,.45);font-family:'Bebas Neue',sans-serif}
+.ct-big-label{font-size:9px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.14em;font-family:'DM Mono',monospace;font-weight:700;margin-top:4px}
+.ct-big-tap-hint{font-size:9px;color:rgba(255,255,255,.25);font-family:'DM Mono',monospace;font-weight:600;margin-top:2px}
+
+/* 3-stat row */
+.ct-stat-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px}
+.ct-stat{background:rgba(255,255,255,.06);border-radius:10px;padding:9px 4px;text-align:center}
+.ct-stat-val{font-family:'Bebas Neue',sans-serif;font-size:22px;color:#fff;line-height:1}
+.ct-stat-label{font-size:8px;color:rgba(255,255,255,.4);font-family:'DM Mono',monospace;font-weight:700;letter-spacing:.07em;margin-top:2px;text-transform:uppercase}
+
+/* Lap scroll */
+.ct-lap-row{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin-bottom:12px;min-height:42px}
+.ct-lap-row::-webkit-scrollbar{display:none}
+.ct-lap-chip{flex-shrink:0;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:5px 10px;text-align:center}
+.ct-lap-chip.active{border-color:rgba(232,240,32,.5);background:rgba(232,240,32,.1)}
+.ct-lap-num{font-size:8px;color:rgba(255,255,255,.35);font-family:'DM Mono',monospace;font-weight:700;text-transform:uppercase}
+.ct-lap-time{font-family:'Bebas Neue',sans-serif;font-size:16px;color:#fff;line-height:1}
+.ct-lap-chip.active .ct-lap-time{color:var(--accent)}
+.ct-lap-pace{font-size:8px;color:rgba(255,255,255,.35);font-family:'DM Mono',monospace;font-weight:600}
+
+/* Control buttons */
+.ct-controls{display:flex;gap:10px;align-items:center}
+.ct-btn-secondary{width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;cursor:pointer;color:#fff;-webkit-tap-highlight-color:transparent;flex-shrink:0}
+.ct-btn-secondary:active{background:rgba(255,255,255,.2)}
+.ct-btn-secondary svg{width:20px;height:20px}
+.ct-btn-main{flex:1;height:58px;border-radius:29px;border:none;font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:.1em;cursor:pointer;-webkit-tap-highlight-color:transparent;display:flex;align-items:center;justify-content:center;gap:10px;transition:all .15s}
+.ct-btn-main:active{transform:scale(.97)}
+.ct-btn-main.start{background:linear-gradient(135deg,#20e880,#16b860);color:#0a0a0f;box-shadow:0 4px 20px rgba(32,232,128,.4)}
+.ct-btn-main.pause{background:linear-gradient(135deg,#ff9020,#e07010);color:#fff;box-shadow:0 4px 20px rgba(255,144,32,.4)}
+.ct-btn-main.resume{background:linear-gradient(135deg,#e8f020,#b8bc18);color:#0a0a0f;box-shadow:0 4px 20px rgba(232,240,32,.4)}
+.ct-btn-main svg{width:22px;height:22px}
+
+/* Map loading overlay */
+.ct-map-loading{position:absolute;inset:0;background:#1a2840;z-index:15;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;transition:opacity .5s}
+.ct-map-loading.hidden{opacity:0;pointer-events:none}
+.ct-map-spinner{width:48px;height:48px;border:3px solid rgba(255,255,255,.15);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite}
+.ct-map-loading p{font-size:13px;color:rgba(255,255,255,.6);font-weight:600;text-align:center}
+.ct-gps-status-big{font-family:'Bebas Neue',sans-serif;font-size:22px;color:#fff;letter-spacing:.04em;text-align:center}
+
+/* Milestone toast */
+.milestone-toast{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);background:rgba(5,5,10,.96);border:2px solid var(--accent);border-radius:24px;padding:24px 32px;text-align:center;z-index:600;pointer-events:none;transition:transform .35s cubic-bezier(.34,1.56,.64,1),opacity .3s;max-width:280px;width:calc(100% - 48px)}
+.milestone-toast.show{transform:translate(-50%,-50%) scale(1)}
+.milestone-toast.hide{transform:translate(-50%,-50%) scale(.88);opacity:0}
+.milestone-icon{font-size:44px;margin-bottom:8px;display:block}
+.milestone-text{font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--accent);letter-spacing:.04em;line-height:1}
+.milestone-sub{font-size:13px;color:var(--text2);margin-top:6px;font-weight:600}
+
+/* Summary screen */
+#cardio-summary{display:none;position:fixed;inset:0;background:var(--bg);z-index:300;flex-direction:column;overflow-y:auto;max-width:480px;margin:0 auto;left:50%;transform:translateX(-50%);width:100%}
+#cardio-summary.open{display:flex}
+.cardio-sum-hero{padding:52px 24px 20px;position:relative;overflow:hidden}
+.cardio-sum-hero-bg{position:absolute;inset:0;opacity:.06}
+.cardio-sum-hero-bg canvas{width:100%;height:100%}
+.cardio-sum-mode-row{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.cardio-sum-mode-icon{font-size:40px;line-height:1}
+.cardio-sum-titles h2{font-family:'Bebas Neue',sans-serif;font-size:32px;color:#fff;letter-spacing:.04em;line-height:1}
+.cardio-sum-titles p{font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;font-weight:600;margin-top:4px}
+.sum-stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 20px 4px}
+.sum-stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:14px}
+.sum-stat-card.accent{border-color:rgba(232,240,32,.3);background:linear-gradient(135deg,rgba(232,240,32,.07),var(--bg2))}
+.sum-stat-val{font-family:'Bebas Neue',sans-serif;font-size:30px;color:var(--accent);line-height:1}
+.sum-stat-label{font-size:9px;color:var(--text3);font-family:'DM Mono',monospace;font-weight:700;margin-top:3px;text-transform:uppercase;letter-spacing:.08em}
+.sum-body{padding:16px 20px 80px}
+.sum-section{margin-bottom:20px}
+.sum-section-title{font-family:'Bebas Neue',sans-serif;font-size:16px;color:#fff;letter-spacing:.04em;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.sum-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--bg3)}
+.sum-row:last-child{border-bottom:none}
+.sum-key{font-size:12px;color:var(--text3);font-weight:600}
+.sum-val{font-size:13px;font-weight:700;color:#fff;font-family:'DM Mono',monospace}
+.lap-table{width:100%;border-collapse:collapse;font-size:11px}
+.lap-table th{text-align:left;color:var(--text3);font-family:'DM Mono',monospace;font-weight:700;padding:4px 0;font-size:10px;text-transform:uppercase;letter-spacing:.07em;border-bottom:1px solid var(--border)}
+.lap-table td{padding:7px 0;border-bottom:1px solid var(--bg3);color:var(--text2);font-family:'DM Mono',monospace;font-weight:600}
+.lap-table tr:last-child td{border-bottom:none}
+.lap-best{color:var(--accent)!important;font-weight:700!important}
+.afterburn-card{background:linear-gradient(135deg,rgba(255,64,96,.07),rgba(255,144,32,.07));border:1px solid rgba(255,144,32,.2);border-radius:var(--radius);padding:14px;margin-bottom:14px}
+.afterburn-card h3{font-family:'Bebas Neue',sans-serif;font-size:15px;color:var(--orange);margin-bottom:6px;letter-spacing:.04em}
+.afterburn-val{font-family:'Bebas Neue',sans-serif;font-size:36px;color:#fff;line-height:1}
+.afterburn-sub{font-size:11px;color:var(--text2);margin-top:4px;line-height:1.55;font-weight:500}
+.route-canvas-wrap{width:100%;height:180px;border-radius:var(--radius);overflow:hidden;background:var(--bg3);border:1px solid var(--border);margin-bottom:14px}
+.route-canvas-wrap canvas{width:100%;height:100%}
+.sum-save-btn{width:100%;padding:17px;background:var(--accent);color:var(--bg);border:none;border-radius:var(--radius);font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:.08em;cursor:pointer;-webkit-tap-highlight-color:transparent;display:block;margin-top:16px}
+.sum-save-btn:active{background:var(--accent2)}
+.sum-discard{display:block;width:100%;padding:12px;background:none;border:none;color:var(--text3);font-size:13px;font-weight:600;cursor:pointer;margin-top:6px;-webkit-tap-highlight-color:transparent}
+
+/* History cards */
+.cardio-history-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);margin:8px 16px;padding:14px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.cardio-history-card:active{border-color:var(--border2)}
+.chc-header{display:flex;align-items:flex-start;gap:12px;margin-bottom:10px}
+.chc-mode-icon{width:40px;height:40px;border-radius:10px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;border:1px solid var(--border)}
+.chc-info{flex:1}
+.chc-name{font-size:14px;font-weight:700;color:#fff}
+.chc-date{font-size:10px;color:var(--text3);font-family:'DM Mono',monospace;font-weight:600;margin-top:2px}
+.chc-stats{display:flex;gap:8px;flex-wrap:wrap}
+.chc-stat{display:flex;flex-direction:column;align-items:center;background:var(--bg3);border-radius:6px;padding:6px 10px;min-width:52px}
+.chc-stat-val{font-family:'Bebas Neue',sans-serif;font-size:17px;color:var(--accent);line-height:1}
+.chc-stat-label{font-size:8px;color:var(--text3);font-family:'DM Mono',monospace;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-top:2px}
+
+/* Quick launch on Today */
+.cardio-quick-launch{margin:0 16px 12px;display:flex;gap:8px}
+.cardio-ql-btn{flex:1;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 10px;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:border-color .15s}
+.cardio-ql-btn:active{border-color:var(--accent)}
+.cardio-ql-icon{font-size:24px}
+.cardio-ql-label{font-family:'Bebas Neue',sans-serif;font-size:14px;color:#fff;letter-spacing:.04em}
+.cardio-ql-sub{font-size:9px;color:var(--text3);font-family:'DM Mono',monospace;font-weight:700;text-align:center}
 
 /* ─── PAGE HEADERS ─── */
 .page-header{padding:52px 20px 14px;background:var(--bg);position:sticky;top:0;z-index:10;border-bottom:1px solid var(--border)}
@@ -828,152 +1036,6 @@ b,strong{color:var(--bold-color);font-weight:700}
 .coach-no-profile h3{font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--text2);margin-bottom:6px}
 .coach-no-profile p{font-size:13px;color:var(--text3);font-weight:500;line-height:1.5}
 
-/* ─── CARDIO TRACKER ─── */
-#cardio-tracker{display:none;position:fixed;inset:0;z-index:250;flex-direction:column;background:var(--bg);max-width:480px;margin:0 auto;left:50%;transform:translateX(-50%);width:100%}
-#cardio-tracker.open{display:flex}
-
-/* Mode selector */
-.cardio-mode-bar{display:flex;gap:0;background:var(--bg3);border-bottom:1px solid var(--border);flex-shrink:0}
-.cardio-mode-btn{flex:1;padding:14px 8px;border:none;background:none;color:var(--text3);font-size:11px;font-weight:700;font-family:'DM Sans',sans-serif;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;-webkit-tap-highlight-color:transparent;display:flex;flex-direction:column;align-items:center;gap:4px;border-bottom:2px solid transparent;transition:all .2s}
-.cardio-mode-btn svg{width:20px;height:20px}
-.cardio-mode-btn.active{color:var(--accent);border-bottom-color:var(--accent)}
-
-/* Live map area */
-#cardio-map-wrap{flex:1;position:relative;background:#0d1117;min-height:0;overflow:hidden}
-#cardio-map{width:100%;height:100%}
-.map-loading-msg{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;pointer-events:none}
-.map-loading-msg svg{width:36px;height:36px;color:var(--text3)}
-.map-loading-msg p{font-size:12px;color:var(--text3);font-weight:600;text-align:center;padding:0 24px}
-
-/* GPS accuracy pill */
-.gps-pill{position:absolute;top:12px;left:50%;transform:translateX(-50%);background:rgba(10,10,15,.85);backdrop-filter:blur(8px);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:10px;font-family:'DM Mono',monospace;font-weight:700;display:flex;align-items:center;gap:5px;z-index:10;white-space:nowrap}
-.gps-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
-.gps-dot.good{background:var(--green);box-shadow:0 0 6px var(--green)}
-.gps-dot.ok{background:var(--orange);box-shadow:0 0 6px var(--orange)}
-.gps-dot.bad{background:var(--red);animation:pulse .8s infinite alternate}
-.gps-dot.wait{background:var(--text3);animation:pulse .8s infinite alternate}
-
-/* Pace zone badge */
-.pace-zone-badge{position:absolute;top:12px;right:12px;border-radius:8px;padding:6px 10px;font-size:11px;font-family:'DM Mono',monospace;font-weight:700;z-index:10;text-align:center}
-.pace-zone-badge .zone-name{font-size:9px;opacity:.8;letter-spacing:.06em;text-transform:uppercase}
-.zone-z1{background:rgba(64,143,255,.25);color:#60a5fa;border:1px solid rgba(64,143,255,.4)}
-.zone-z2{background:rgba(32,232,128,.25);color:#34d399;border:1px solid rgba(32,232,128,.4)}
-.zone-z3{background:rgba(232,240,32,.25);color:var(--accent);border:1px solid rgba(232,240,32,.4)}
-.zone-z4{background:rgba(255,144,32,.25);color:#fb923c;border:1px solid rgba(255,144,32,.4)}
-.zone-z5{background:rgba(255,64,96,.25);color:#f87171;border:1px solid rgba(255,64,96,.4)}
-
-/* Recenter button */
-.map-recenter-btn{position:absolute;bottom:16px;right:12px;width:40px;height:40px;background:rgba(10,10,15,.9);border:1px solid var(--border);border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text2);-webkit-tap-highlight-color:transparent;z-index:10}
-.map-recenter-btn:active{color:var(--accent);border-color:var(--accent)}
-.map-recenter-btn svg{width:18px;height:18px}
-
-/* Live stats panel */
-.cardio-stats-panel{flex-shrink:0;background:var(--bg2);border-top:1px solid var(--border);padding:14px 16px 10px}
-.cardio-primary-stat{text-align:center;margin-bottom:10px}
-.cardio-big-num{font-family:'Bebas Neue',sans-serif;font-size:72px;line-height:1;color:#fff;letter-spacing:-.02em}
-.cardio-big-num .unit{font-size:24px;color:var(--text3);margin-left:2px}
-.cardio-big-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.12em;font-family:'DM Mono',monospace;font-weight:700;margin-top:-4px}
-.cardio-stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px}
-.cardio-stat-cell{background:var(--bg3);border-radius:8px;padding:8px 4px;text-align:center}
-.csc-val{font-family:'Bebas Neue',sans-serif;font-size:18px;color:#fff;line-height:1}
-.csc-unit{font-size:9px;color:var(--text3);font-family:'DM Mono',monospace;font-weight:700;letter-spacing:.06em;margin-top:2px}
-
-/* Lap strip */
-.lap-strip{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px;margin-bottom:8px}
-.lap-strip::-webkit-scrollbar{display:none}
-.lap-chip{flex-shrink:0;background:var(--bg4);border:1px solid var(--border);border-radius:6px;padding:4px 8px;text-align:center}
-.lap-chip.current{border-color:rgba(232,240,32,.4);background:var(--accent-dim)}
-.lap-chip-num{font-size:9px;color:var(--text3);font-family:'DM Mono',monospace;font-weight:700}
-.lap-chip-time{font-family:'Bebas Neue',sans-serif;font-size:15px;color:#fff;line-height:1}
-.lap-chip.current .lap-chip-time{color:var(--accent)}
-.lap-chip-pace{font-size:9px;color:var(--text3);font-family:'DM Mono',monospace;font-weight:600}
-
-/* Controls */
-.cardio-controls{display:flex;gap:10px;flex-shrink:0;padding:10px 16px;padding-bottom:calc(10px + var(--safe-bottom));background:var(--bg);border-top:1px solid var(--border)}
-.cardio-ctrl-btn{flex:1;padding:16px;border-radius:var(--radius);border:none;font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:.08em;cursor:pointer;-webkit-tap-highlight-color:transparent;display:flex;align-items:center;justify-content:center;gap:8px;transition:opacity .15s}
-.cardio-ctrl-btn:active{opacity:.8}
-.cardio-ctrl-btn.start{background:var(--green);color:#0a0a0f}
-.cardio-ctrl-btn.pause{background:var(--orange);color:#0a0a0f}
-.cardio-ctrl-btn.resume{background:var(--accent);color:#0a0a0f}
-.cardio-ctrl-btn.stop{background:var(--red);color:#fff;flex:0 0 auto;width:56px;padding:16px 0}
-.cardio-ctrl-btn.lap{background:var(--bg3);border:1px solid var(--border);color:var(--text2);flex:0 0 auto;width:56px;padding:16px 0}
-.cardio-ctrl-btn.back-btn{background:var(--bg3);border:1px solid var(--border);color:var(--text2);flex:0 0 auto;width:56px;padding:16px 0}
-.cardio-ctrl-btn svg{width:20px;height:20px}
-
-/* Topbar */
-.cardio-topbar{display:flex;align-items:center;padding:48px 16px 0;gap:10px;flex-shrink:0;background:var(--bg2);border-bottom:1px solid var(--border)}
-.cardio-title-input{flex:1;background:none;border:none;font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:.04em;color:#fff;outline:none;padding-bottom:10px}
-.cardio-close-btn{background:none;border:none;color:var(--text3);cursor:pointer;padding:4px 4px 14px;display:flex;-webkit-tap-highlight-color:transparent}
-.cardio-close-btn:active{color:var(--red)}
-
-/* Milestone toast (shown over map) */
-.milestone-toast{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);background:rgba(10,10,15,.95);border:2px solid var(--accent);border-radius:20px;padding:20px 28px;text-align:center;z-index:600;pointer-events:none;transition:transform .3s cubic-bezier(.34,1.56,.64,1),opacity .3s}
-.milestone-toast.show{transform:translate(-50%,-50%) scale(1)}
-.milestone-toast.hide{transform:translate(-50%,-50%) scale(.9);opacity:0}
-.milestone-icon{font-size:36px;margin-bottom:6px}
-.milestone-text{font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--accent);letter-spacing:.04em;line-height:1}
-.milestone-sub{font-size:12px;color:var(--text2);margin-top:4px;font-weight:600}
-
-/* Summary screen */
-#cardio-summary{display:none;position:fixed;inset:0;background:var(--bg);z-index:300;flex-direction:column;overflow-y:auto;max-width:480px;margin:0 auto;left:50%;transform:translateX(-50%);width:100%}
-#cardio-summary.open{display:flex}
-.cardio-sum-hero{background:linear-gradient(180deg,var(--bg3) 0%,var(--bg) 100%);padding:52px 24px 24px;text-align:center;flex-shrink:0;position:relative}
-.cardio-sum-mode-icon{font-size:48px;margin-bottom:8px}
-.cardio-sum-title{font-family:'Bebas Neue',sans-serif;font-size:36px;color:#fff;letter-spacing:.04em;line-height:1}
-.cardio-sum-date{font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;font-weight:600;margin-top:4px}
-.cardio-sum-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 20px 0}
-.cardio-sum-stat{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:14px;text-align:center}
-.cardio-sum-stat.span2{grid-column:1/-1}
-.css-val{font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--accent);line-height:1}
-.css-label{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.09em;font-family:'DM Mono',monospace;font-weight:700;margin-top:3px}
-.cardio-sum-body{padding:16px 20px 80px;flex:1}
-.cardio-sum-section{margin-bottom:20px}
-.cardio-sum-section-title{font-family:'Bebas Neue',sans-serif;font-size:18px;color:#fff;letter-spacing:.04em;margin-bottom:10px}
-.cardio-sum-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--bg3)}
-.cardio-sum-row:last-child{border-bottom:none}
-.cardio-sum-key{font-size:12px;color:var(--text3);font-weight:600}
-.cardio-sum-val{font-size:13px;font-weight:700;color:#fff;font-family:'DM Mono',monospace}
-.lap-table{width:100%;border-collapse:collapse;font-size:11px}
-.lap-table th{text-align:left;color:var(--text3);font-family:'DM Mono',monospace;font-weight:700;padding:4px 0;font-size:10px;text-transform:uppercase;letter-spacing:.07em;border-bottom:1px solid var(--border)}
-.lap-table td{padding:7px 0;border-bottom:1px solid var(--bg3);color:var(--text2);font-family:'DM Mono',monospace;font-weight:600}
-.lap-table tr:last-child td{border-bottom:none}
-.lap-best{color:var(--accent)!important;font-weight:700!important}
-.afterburn-card{background:linear-gradient(135deg,rgba(255,64,96,.08),rgba(255,144,32,.08));border:1px solid rgba(255,144,32,.25);border-radius:var(--radius);padding:14px;margin-bottom:14px}
-.afterburn-title{font-family:'Bebas Neue',sans-serif;font-size:16px;color:var(--orange);margin-bottom:8px;letter-spacing:.04em}
-.afterburn-val{font-family:'Bebas Neue',sans-serif;font-size:32px;color:#fff;line-height:1}
-.afterburn-sub{font-size:11px;color:var(--text2);margin-top:4px;line-height:1.5;font-weight:500}
-.route-map-static{width:100%;height:200px;border-radius:var(--radius);overflow:hidden;background:var(--bg3);border:1px solid var(--border);margin-bottom:14px;position:relative}
-.route-map-static canvas{width:100%;height:100%}
-.cardio-sum-save-btn{width:100%;padding:16px;background:var(--accent);color:var(--bg);border:none;border-radius:var(--radius);font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:.08em;cursor:pointer;-webkit-tap-highlight-color:transparent;margin-top:16px;display:block}
-.cardio-sum-save-btn:active{background:var(--accent2)}
-.cardio-sum-discard{display:block;width:100%;padding:12px;background:none;border:none;color:var(--text3);font-size:13px;font-weight:600;cursor:pointer;margin-top:6px;-webkit-tap-highlight-color:transparent}
-
-/* History cards for runs/cycles */
-.cardio-history-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);margin:8px 16px;padding:14px;cursor:pointer;-webkit-tap-highlight-color:transparent}
-.cardio-history-card:active{border-color:var(--border2)}
-.chc-header{display:flex;align-items:flex-start;gap:12px;margin-bottom:10px}
-.chc-mode-icon{width:40px;height:40px;border-radius:10px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;border:1px solid var(--border)}
-.chc-info{flex:1}
-.chc-name{font-size:14px;font-weight:700;color:#fff}
-.chc-date{font-size:10px;color:var(--text3);font-family:'DM Mono',monospace;font-weight:600;margin-top:2px}
-.chc-stats{display:flex;gap:10px;flex-wrap:wrap}
-.chc-stat{display:flex;flex-direction:column;align-items:center;background:var(--bg3);border-radius:6px;padding:6px 10px;min-width:52px}
-.chc-stat-val{font-family:'Bebas Neue',sans-serif;font-size:17px;color:var(--accent);line-height:1}
-.chc-stat-label{font-size:8px;color:var(--text3);font-family:'DM Mono',monospace;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-top:2px}
-.chc-route-mini{height:80px;border-radius:8px;overflow:hidden;background:var(--bg3);border:1px solid var(--border);position:relative;margin-top:8px}
-.chc-route-mini canvas{width:100%;height:100%}
-
-/* Cadence / HR graph */
-.pace-graph{width:100%;height:60px;margin:8px 0}
-.pace-graph canvas{width:100%;height:100%}
-
-/* Today quick launch */
-.cardio-quick-launch{margin:0 16px 12px;display:flex;gap:8px}
-.cardio-ql-btn{flex:1;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 10px;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:border-color .15s}
-.cardio-ql-btn:active{border-color:var(--accent)}
-.cardio-ql-icon{font-size:24px}
-.cardio-ql-label{font-family:'Bebas Neue',sans-serif;font-size:14px;color:#fff;letter-spacing:.04em}
-.cardio-ql-sub{font-size:9px;color:var(--text3);font-family:'DM Mono',monospace;font-weight:700;text-align:center}
 </style>
 </head>
 <body>
@@ -1121,100 +1183,172 @@ b,strong{color:var(--bold-color);font-weight:700}
 <div id="app">
   <nav class="bottom-nav">
     <button class="nav-btn active" onclick="showView('today')" id="nav-today">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/></svg>
-      Today
-    </button>
-    <button class="nav-btn" onclick="showView('history')" id="nav-history">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg>
-      History
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Home
     </button>
     <button class="nav-btn" onclick="showView('progress')" id="nav-progress">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
       Progress
     </button>
+    <div class="nav-fab-wrap">
+      <button class="nav-fab" onclick="openActivitySheet()" id="nav-fab" aria-label="Start Activity">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </button>
+    </div>
+    <button class="nav-btn" onclick="showView('nutrition')" id="nav-nutrition">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/></svg>
+      Nutrition
+    </button>
     <button class="nav-btn" onclick="showView('body')" id="nav-body">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="5" r="2"/><path d="M12 7v8M8 11h8M9 21l3-6 3 6"/></svg>
       Body
     </button>
-    <button class="nav-btn" onclick="showView('exercises')" id="nav-exercises">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 5v14M18 5v14M2 9h4M18 9h4M2 15h4M18 15h4"/></svg>
-      Exercises
-    </button>
-    <button class="nav-btn" onclick="showView('coach')" id="nav-coach">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-      Coach
-    </button>
-    <button class="nav-btn" onclick="showView('nutrition')" id="nav-nutrition">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
-      Nutrition
-    </button>
   </nav>
 
-  <!-- TODAY -->
+  <!-- ACTIVITY LAUNCH SHEET -->
+  <div id="activity-sheet">
+    <div class="activity-sheet-backdrop" onclick="closeActivitySheet()"></div>
+    <div class="activity-sheet-panel">
+      <div class="activity-sheet-handle"></div>
+      <div class="activity-sheet-title">
+        WHAT ARE YOU DOING?
+        <button class="activity-sheet-close" onclick="closeActivitySheet()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+      <div class="activity-grid">
+        <div class="activity-tile primary" onclick="closeActivitySheet();startWorkout()">
+          <div class="activity-tile-icon">🏋️</div>
+          <div class="activity-tile-label">GYM<br>WORKOUT</div>
+          <div class="activity-tile-sub" id="act-gym-sub">Weights & machines</div>
+        </div>
+        <div class="activity-tile cardio-run" onclick="closeActivitySheet();openCardioTracker('run')">
+          <div class="activity-tile-icon">🏃</div>
+          <div class="activity-tile-label">RUN</div>
+          <div class="activity-tile-sub" id="act-run-sub">GPS tracked</div>
+        </div>
+        <div class="activity-tile cardio-cycle" onclick="closeActivitySheet();openCardioTracker('cycle')">
+          <div class="activity-tile-icon">🚴</div>
+          <div class="activity-tile-label">CYCLE</div>
+          <div class="activity-tile-sub" id="act-cycle-sub">Speed & route</div>
+        </div>
+        <div class="activity-tile cardio-walk" onclick="closeActivitySheet();openCardioTracker('walk')">
+          <div class="activity-tile-icon">🚶</div>
+          <div class="activity-tile-label">WALK</div>
+          <div class="activity-tile-sub" id="act-walk-sub">Steps & distance</div>
+        </div>
+        <div class="activity-tile nutrition-tile" onclick="closeActivitySheet();showView('nutrition')">
+          <div class="activity-tile-icon">🥗</div>
+          <div class="activity-tile-label">LOG<br>FOOD</div>
+          <div class="activity-tile-sub">Calories & macros</div>
+        </div>
+        <div class="activity-tile body-tile" onclick="closeActivitySheet();openBWModal()">
+          <div class="activity-tile-icon">⚖️</div>
+          <div class="activity-tile-label">LOG<br>WEIGHT</div>
+          <div class="activity-tile-sub">Body stats</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TODAY / HOME DASHBOARD -->
   <div id="view-today" class="view active">
-    <div class="page-header">
-      <div class="page-title">IRON <span>LOG</span></div>
-      <div class="page-sub" id="today-date-label"></div>
-      <div class="user-bar">
-        <div class="user-bar-avatar" id="user-avatar-today"></div>
-        <div class="user-bar-name">Hey, <span id="user-bar-name-text"></span> 👋</div>
-        <button class="logout-btn" onclick="confirmLogout()">Sign Out</button>
+    <div class="dashboard-header">
+      <div class="dash-greeting">
+        <div class="dash-greeting-text">
+          <h1 id="dash-greeting-title">GOOD MORNING</h1>
+          <p id="today-date-label"></p>
+        </div>
+        <button class="dash-avatar-btn" id="user-avatar-today" onclick="openUserMenu()"></button>
       </div>
     </div>
-    <div class="streak-banner">
-      <div class="streak-ring">
-        <svg viewBox="0 0 64 64"><circle class="bg" cx="32" cy="32" r="26"/><circle class="prog" id="streak-circle" cx="32" cy="32" r="26"/></svg>
-        <div class="center-text"><span class="big" id="streak-days">0</span><span class="small">DAYS</span></div>
+
+    <!-- Quick action pills -->
+    <div class="quick-action-row">
+      <div class="qa-pill gym" onclick="startWorkout()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 5v14M18 5v14M2 9h4M18 9h4M2 15h4M18 15h4"/></svg>
+        <span>Gym</span>
       </div>
-      <div class="streak-info">
-        <div class="streak-label" id="streak-label">START STREAK</div>
-        <div class="streak-sublabel" id="streak-sublabel">Hit the gym to begin</div>
-        <div class="week-dots" id="week-dots"></div>
+      <div class="qa-pill run" onclick="openCardioTracker('run')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="2"/><path d="M12 7l-2 5 4 2-2 4"/><path d="M8 12l-2 4"/><path d="M16 8l2 3"/></svg>
+        <span>Run</span>
+      </div>
+      <div class="qa-pill cycle" onclick="openCardioTracker('cycle')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="16" r="3"/><circle cx="6" cy="16" r="3"/><path d="M6 16l3-8 3 3 3-3 3 5"/></svg>
+        <span>Cycle</span>
+      </div>
+      <div class="qa-pill food" onclick="showView('nutrition')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/></svg>
+        <span>Food</span>
+      </div>
+      <div class="qa-pill body" onclick="showView('body')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="2"/><path d="M12 7v8M8 11h8M9 21l3-6 3 6"/></svg>
+        <span>Body</span>
+      </div>
+      <div class="qa-pill" style="--c:var(--purple)" onclick="showView('coach')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#c060ff" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <span style="color:#c060ff">Coach</span>
       </div>
     </div>
-    <div class="quick-stats" id="quick-stats"></div>
-    <div class="motivation-strip" id="motivation-strip"></div>
-    <div class="bw-strip">
+
+    <!-- Streak + quick stats -->
+    <div class="dash-section" style="padding-top:14px">
+      <div class="streak-banner">
+        <div class="streak-ring">
+          <svg viewBox="0 0 64 64"><circle class="bg" cx="32" cy="32" r="26"/><circle class="prog" id="streak-circle" cx="32" cy="32" r="26"/></svg>
+          <div class="center-text"><span class="big" id="streak-days">0</span><span class="small">DAYS</span></div>
+        </div>
+        <div class="streak-info">
+          <div class="streak-label" id="streak-label">START STREAK</div>
+          <div class="streak-sublabel" id="streak-sublabel">Hit the gym to begin</div>
+          <div class="week-dots" id="week-dots"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick stats strip -->
+    <div class="quick-stats" id="quick-stats" style="padding:10px 16px 0"></div>
+
+    <!-- Motivation -->
+    <div style="padding:0 16px"><div class="motivation-strip" id="motivation-strip"></div></div>
+
+    <!-- Body weight quick log -->
+    <div style="padding:0 16px"><div class="bw-strip">
       <div class="bw-label">⚖️ Today's Weight</div>
       <input class="bw-input" type="number" id="bw-today-input" placeholder="—" step="0.1" min="30" max="250" inputmode="decimal">
       <span class="bw-unit">kg</span>
       <button class="bw-save-btn" onclick="saveBWToday()">Log</button>
-    </div>
-    <div class="section-label">
-      <span>Cardio</span>
-    </div>
-    <div class="cardio-quick-launch">
-      <div class="cardio-ql-btn" onclick="openCardioTracker('run')">
-        <div class="cardio-ql-icon">🏃</div>
-        <div class="cardio-ql-label">RUN</div>
-        <div class="cardio-ql-sub" id="ql-run-stat">Track pace & route</div>
+    </div></div>
+
+    <!-- Recent activity -->
+    <div class="dash-section">
+      <div class="dash-section-header">
+        <div class="dash-section-title">RECENT ACTIVITY</div>
+        <div class="dash-section-action" onclick="showView('history')">See all →</div>
       </div>
-      <div class="cardio-ql-btn" onclick="openCardioTracker('cycle')">
-        <div class="cardio-ql-icon">🚴</div>
-        <div class="cardio-ql-label">CYCLE</div>
-        <div class="cardio-ql-sub" id="ql-cycle-stat">Track speed & distance</div>
-      </div>
-      <div class="cardio-ql-btn" onclick="openCardioTracker('walk')">
-        <div class="cardio-ql-icon">🚶</div>
-        <div class="cardio-ql-label">WALK</div>
-        <div class="cardio-ql-sub" id="ql-walk-stat">Easy cardio</div>
-      </div>
+      <div id="recent-workouts"></div>
     </div>
-    <div class="section-label">
-      <span>Templates</span>
-      <span class="section-label-action" onclick="openTemplateManager()">+ New</span>
+
+    <!-- Templates quick launch -->
+    <div class="dash-section">
+      <div class="dash-section-header">
+        <div class="dash-section-title">TEMPLATES</div>
+        <div class="dash-section-action" onclick="openTemplateManager()">+ New</div>
+      </div>
+      <div class="templates-scroll" id="templates-scroll"></div>
     </div>
-    <div class="templates-scroll" id="templates-scroll"></div>
-    <button class="workout-start-btn" onclick="startWorkout()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="5 3 19 12 5 21 5 3"/></svg>START WORKOUT</button>
-    <div class="section-label">Recent</div>
-    <div id="recent-workouts"></div>
+
+    <div style="height:24px"></div>
   </div>
 
   <!-- HISTORY -->
   <div id="view-history" class="view">
     <div class="page-header">
-      <div class="page-title">WORK<span>OUT</span> LOG</div>
-      <div class="page-sub" id="history-count-label">0 sessions</div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <button onclick="showView('progress')" style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;color:var(--text2);cursor:pointer;-webkit-tap-highlight-color:transparent;flex-shrink:0"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="15 18 9 12 15 6"/></svg></button>
+        <div>
+          <div class="page-title">WORK<span>OUT</span> LOG</div>
+          <div class="page-sub" id="history-count-label">0 sessions</div>
+        </div>
+      </div>
     </div>
     <div class="history-filters" id="history-filters"></div>
     <div id="history-list" class="scroll-content"></div>
@@ -1222,7 +1356,12 @@ b,strong{color:var(--bold-color);font-weight:700}
 
   <!-- PROGRESS -->
   <div id="view-progress" class="view">
-    <div class="page-header"><div class="page-title">PROG<span>RESS</span></div><div class="page-sub">All-time stats</div></div>
+    <div class="page-header"><div class="page-title">PROG<span>RESS</span></div><div class="page-sub">All-time stats</div>
+      <div class="header-actions" style="margin-top:10px">
+        <button class="header-btn" style="background:var(--bg3);color:var(--text2);border:1px solid var(--border)" onclick="showView('history')">📋 Workout Log</button>
+        <button class="header-btn" style="background:var(--bg3);color:var(--text2);border:1px solid var(--border)" onclick="showView('exercises')">🏋️ Exercises</button>
+      </div>
+    </div>
     <div class="stats-grid">
       <div class="stat-card"><div class="stat-label">Total Sessions</div><div class="stat-value" id="stat-sessions">0</div><div class="stat-unit">workouts</div></div>
       <div class="stat-card"><div class="stat-label">This Week</div><div class="stat-value" id="stat-week">0</div><div class="stat-unit">days trained</div></div>
@@ -1279,8 +1418,13 @@ b,strong{color:var(--bold-color);font-weight:700}
   <!-- EXERCISES -->
   <div id="view-exercises" class="view">
     <div class="page-header">
-      <div class="page-title">EXER<span>CISES</span></div>
-      <div class="page-sub" id="ex-count-label">Machine library</div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <button onclick="showView('progress')" style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;color:var(--text2);cursor:pointer;-webkit-tap-highlight-color:transparent;flex-shrink:0"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="15 18 9 12 15 6"/></svg></button>
+        <div>
+          <div class="page-title">EXER<span>CISES</span></div>
+          <div class="page-sub" id="ex-count-label">Machine library</div>
+        </div>
+      </div>
       <div class="header-actions">
         <input type="text" class="search-bar" placeholder="Search exercises..." oninput="filterExercises(this.value)" id="ex-search">
         <button class="header-btn" onclick="openAddExercise()"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>ADD</button>
@@ -1481,120 +1625,122 @@ b,strong{color:var(--bold-color);font-weight:700}
 <input type="file" id="scan-file-camera" accept="image/*" capture="environment">
 <input type="file" id="scan-file-gallery" accept="image/*" multiple="false">
 
-<!-- CARDIO TRACKER PANEL -->
+<!-- CARDIO TRACKER PANEL — full-bleed map -->
 <div id="cardio-tracker">
-  <!-- Topbar -->
-  <div class="cardio-topbar">
-    <button class="cardio-close-btn" onclick="closeCardioTracker()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg></button>
-    <input class="cardio-title-input" id="cardio-title-input" type="text" placeholder="MORNING RUN" maxlength="40">
-    <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text3);font-weight:700;padding-bottom:10px" id="cardio-date-label"></div>
+  <!-- Map fills the whole screen -->
+  <div id="cardio-map-wrap">
+    <div id="cardio-map"></div>
+    <div class="ct-map-loading" id="ct-map-loading">
+      <div class="ct-map-spinner"></div>
+      <div class="ct-gps-status-big" id="ct-gps-status-big">FINDING YOU…</div>
+      <p id="ct-gps-status-sub">Allow location access when prompted.<br>Best results outdoors with clear sky view.</p>
+    </div>
   </div>
-  <!-- Mode selector -->
-  <div class="cardio-mode-bar" id="cardio-mode-bar">
-    <button class="cardio-mode-btn" id="cardio-mode-run" onclick="setCardioMode('run')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="5" r="2"/><path d="M12 7l-2 5 4 2-2 4"/><path d="M8 12l-2 4"/><path d="M16 8l2 3"/></svg>
+
+  <!-- Floating topbar -->
+  <div class="ct-topbar">
+    <button class="ct-back" onclick="closeCardioTracker()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="15 18 9 12 15 6"/></svg></button>
+    <input class="ct-title-input" id="cardio-title-input" type="text" placeholder="MORNING RUN" maxlength="40">
+  </div>
+
+  <!-- Mode pills -->
+  <div class="ct-mode-pills" id="ct-mode-pills">
+    <button class="ct-mode-pill" id="cardio-mode-run" onclick="setCardioMode('run')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="2"/><path d="M12 7l-2 5 4 2-2 4"/><path d="M8 12l-2 4"/></svg>
       Run
     </button>
-    <button class="cardio-mode-btn" id="cardio-mode-cycle" onclick="setCardioMode('cycle')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="18" cy="16" r="4"/><circle cx="6" cy="16" r="4"/><path d="M6 16l3-9 3 3 3-3 3 6"/><circle cx="12" cy="7" r="1"/></svg>
+    <button class="ct-mode-pill" id="cardio-mode-cycle" onclick="setCardioMode('cycle')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="16" r="3"/><circle cx="6" cy="16" r="3"/><path d="M6 16l3-8 3 3 3-3 3 5"/></svg>
       Cycle
     </button>
-    <button class="cardio-mode-btn" id="cardio-mode-walk" onclick="setCardioMode('walk')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="5" r="2"/><path d="M12 7v6l-3 3"/><path d="M12 13l3 3"/><path d="M9 19l-1 2"/><path d="M15 19l1 2"/></svg>
+    <button class="ct-mode-pill" id="cardio-mode-walk" onclick="setCardioMode('walk')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="2"/><path d="M12 7v6l-3 3"/><path d="M12 13l3 3"/></svg>
       Walk
     </button>
   </div>
-  <!-- Map -->
-  <div id="cardio-map-wrap">
-    <div id="cardio-map"></div>
-    <div class="map-loading-msg" id="map-loading-msg">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
-      <p>Waiting for GPS signal…</p>
-    </div>
-    <div class="gps-pill" id="gps-pill"><div class="gps-dot wait" id="gps-dot"></div><span id="gps-label">Locating…</span></div>
-    <div class="pace-zone-badge zone-z2" id="pace-zone-badge" style="display:none">
+
+  <!-- GPS + zone pills -->
+  <div class="ct-floating-pills">
+    <div class="ct-gps-pill" id="gps-pill"><div class="gps-dot searching" id="gps-dot"></div><span id="gps-label">Locating…</span></div>
+    <div class="ct-zone-pill zone-z2" id="pace-zone-badge">
       <div id="pace-zone-name">Zone 2</div>
-      <div class="zone-name" id="pace-zone-label">Easy</div>
     </div>
-    <button class="map-recenter-btn" id="map-recenter-btn" onclick="recenterMap()" style="display:none">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M1 12h4M19 12h4"/></svg>
-    </button>
   </div>
-  <!-- Live stats -->
-  <div class="cardio-stats-panel">
-    <div class="cardio-primary-stat">
-      <div class="cardio-big-num" id="cardio-big-num">0<span class="unit" id="cardio-big-unit">km</span></div>
-      <div class="cardio-big-label" id="cardio-big-label">DISTANCE</div>
+
+  <!-- Recenter -->
+  <button class="ct-recenter" id="map-recenter-btn" onclick="recenterMap()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="8" stroke-dasharray="2 3"/></svg>
+  </button>
+
+  <!-- Stats panel over map bottom -->
+  <div class="ct-stats">
+    <div class="ct-primary" onclick="cyclePrimaryMetric()">
+      <div><span class="ct-big-val" id="cardio-big-num">0.00</span><span class="ct-big-unit" id="cardio-big-unit"> km</span></div>
+      <div class="ct-big-label" id="cardio-big-label">DISTANCE</div>
+      <div class="ct-big-tap-hint">tap to switch metric</div>
     </div>
-    <div class="cardio-stat-row">
-      <div class="cardio-stat-cell"><div class="csc-val" id="csc-time">0:00</div><div class="csc-unit">Time</div></div>
-      <div class="cardio-stat-cell"><div class="csc-val" id="csc-pace">—</div><div class="csc-unit" id="csc-pace-label">Min/km</div></div>
-      <div class="cardio-stat-cell"><div class="csc-val" id="csc-cal">0</div><div class="csc-unit">kcal</div></div>
-      <div class="cardio-stat-cell"><div class="csc-val" id="csc-cadence">—</div><div class="csc-unit" id="csc-cadence-label">Cadence</div></div>
+    <div class="ct-stat-row">
+      <div class="ct-stat"><div class="ct-stat-val" id="csc-time">0:00</div><div class="ct-stat-label">Time</div></div>
+      <div class="ct-stat"><div class="ct-stat-val" id="csc-pace">—</div><div class="ct-stat-label" id="csc-pace-label">Min/km</div></div>
+      <div class="ct-stat"><div class="ct-stat-val" id="csc-cal">0</div><div class="ct-stat-label">kcal</div></div>
     </div>
-    <!-- Lap strip -->
-    <div class="lap-strip" id="lap-strip"></div>
-  </div>
-  <!-- Controls -->
-  <div class="cardio-controls">
-    <button class="cardio-ctrl-btn back-btn" id="cardio-back-btn" onclick="closeCardioTracker()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="15 18 9 12 15 6"/></svg>
-    </button>
-    <button class="cardio-ctrl-btn start" id="cardio-main-btn" onclick="cardioMainAction()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" id="cardio-main-icon"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-      <span id="cardio-main-label">START</span>
-    </button>
-    <button class="cardio-ctrl-btn lap" id="cardio-lap-btn" onclick="markLap()" style="display:none">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-    </button>
-    <button class="cardio-ctrl-btn stop" id="cardio-stop-btn" onclick="stopCardio()" style="display:none">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>
-    </button>
+    <div class="ct-lap-row" id="lap-strip"></div>
+    <div class="ct-controls">
+      <button class="ct-btn-secondary" id="cardio-lap-btn" onclick="markLap()" style="display:none" aria-label="Mark lap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      </button>
+      <button class="ct-btn-main start" id="cardio-main-btn" onclick="cardioMainAction()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" id="cardio-main-icon"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        <span id="cardio-main-label">START</span>
+      </button>
+      <button class="ct-btn-secondary" id="cardio-stop-btn" onclick="stopCardio()" style="display:none;background:rgba(255,64,96,.25);border-color:rgba(255,64,96,.5)" aria-label="Finish">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="5" y="5" width="14" height="14" rx="2"/></svg>
+      </button>
+    </div>
   </div>
 </div>
 
 <!-- CARDIO SUMMARY -->
 <div id="cardio-summary">
   <div class="cardio-sum-hero">
-    <div class="cardio-sum-mode-icon" id="sum-mode-icon">🏃</div>
-    <div class="cardio-sum-title" id="sum-title">RUN COMPLETE</div>
-    <div class="cardio-sum-date" id="sum-date"></div>
+    <div class="cardio-sum-mode-row">
+      <div class="cardio-sum-mode-icon" id="sum-mode-icon">🏃</div>
+      <div class="cardio-sum-titles">
+        <h2 id="sum-title">RUN COMPLETE</h2>
+        <p id="sum-date"></p>
+      </div>
+    </div>
   </div>
-  <div class="cardio-sum-stats" id="sum-stats-grid" style="padding:16px 20px 0"></div>
-  <div class="cardio-sum-body">
-    <!-- Route mini-map -->
-    <div class="cardio-sum-section">
-      <div class="cardio-sum-section-title">ROUTE</div>
-      <div class="route-map-static" id="sum-route-map">
+  <div class="sum-stat-grid" id="sum-stats-grid"></div>
+  <div class="sum-body">
+    <div class="sum-section">
+      <div class="sum-section-title">🗺️ ROUTE</div>
+      <div class="route-canvas-wrap" id="sum-route-map">
         <canvas id="sum-route-canvas"></canvas>
       </div>
     </div>
-    <!-- Afterburn -->
     <div class="afterburn-card" id="sum-afterburn" style="display:none">
-      <div class="afterburn-title">🔥 AFTERBURN EFFECT (EPOC)</div>
+      <h3>🔥 AFTERBURN EFFECT (EPOC)</h3>
       <div style="display:flex;align-items:baseline;gap:8px">
         <div class="afterburn-val" id="sum-afterburn-val">0</div>
         <div style="font-size:13px;color:var(--orange);font-family:'DM Mono',monospace;font-weight:700">extra kcal</div>
       </div>
-      <div class="afterburn-sub" id="sum-afterburn-sub">Estimated post-exercise calorie burn over next 24h</div>
+      <div class="afterburn-sub" id="sum-afterburn-sub"></div>
     </div>
-    <!-- Laps -->
-    <div class="cardio-sum-section" id="sum-laps-section" style="display:none">
-      <div class="cardio-sum-section-title">LAPS</div>
+    <div class="sum-section" id="sum-laps-section" style="display:none">
+      <div class="sum-section-title">⏱️ LAPS</div>
       <table class="lap-table" id="sum-lap-table"></table>
     </div>
-    <!-- Detail stats -->
-    <div class="cardio-sum-section">
-      <div class="cardio-sum-section-title">DETAILS</div>
+    <div class="sum-section">
+      <div class="sum-section-title">📊 DETAILS</div>
       <div id="sum-details"></div>
     </div>
-    <!-- AI Analysis -->
     <div id="sum-ai-card" style="display:none;background:var(--bg2);border:1px solid var(--border);border-top:2px solid #7c3aed;border-radius:var(--radius);padding:14px;margin-bottom:14px">
       <div style="font-family:'Bebas Neue',sans-serif;font-size:16px;color:#fff;letter-spacing:.04em;margin-bottom:8px">⚡ AI COACH INSIGHT</div>
       <div id="sum-ai-text" style="font-size:13px;color:var(--text2);line-height:1.6;font-weight:500"></div>
     </div>
-    <button class="cardio-sum-save-btn" onclick="saveCardioSession()">SAVE ACTIVITY 💪</button>
-    <button class="cardio-sum-discard" onclick="discardCardioSession()">Discard this session</button>
+    <button class="sum-save-btn" onclick="saveCardioSession()">SAVE ACTIVITY 💪</button>
+    <button class="sum-discard" onclick="discardCardioSession()">Discard this session</button>
   </div>
 </div>
 
@@ -1956,7 +2102,10 @@ function showApp(){
   document.getElementById('auth-screen').classList.remove('show');
   document.getElementById('app').style.display='';
   document.getElementById('user-avatar-today').textContent=currentUser[0].toUpperCase();
-  document.getElementById('user-bar-name-text').textContent=currentUser;
+  const gh=new Date().getHours();
+  const greet=gh<12?'GOOD MORNING':gh<17?'GOOD AFTERNOON':'GOOD EVENING';
+  const gEl=document.getElementById('dash-greeting-title');
+  if(gEl)gEl.textContent=greet+', '+currentUser.toUpperCase();
   renderToday();checkResumeWorkout()
 }
 function showAuthScreen(){
@@ -2039,8 +2188,11 @@ function clearActiveWorkout(){const k=getActiveKey();if(k)localStorage.removeIte
 function showView(name){
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
-  document.getElementById('view-'+name).classList.add('active');
-  document.getElementById('nav-'+name).classList.add('active');
+  const view=document.getElementById('view-'+name);if(view)view.classList.add('active');
+  const navBtn=document.getElementById('nav-'+name);if(navBtn)navBtn.classList.add('active');
+  // Views without their own nav button highlight their parent tab
+  if(name==='history'||name==='exercises')document.getElementById('nav-progress')?.classList.add('active');
+  if(name==='coach')document.getElementById('nav-today')?.classList.add('active');
   if(name==='today')renderToday();
   if(name==='history')renderHistory();
   if(name==='progress')renderProgress();
@@ -2048,6 +2200,23 @@ function showView(name){
   if(name==='exercises')renderExerciseLib();
   if(name==='coach')renderCoachView();
   if(name==='nutrition')renderNutritionView();
+}
+
+// ── ACTIVITY LAUNCH SHEET ──
+function openActivitySheet(){
+  document.getElementById('activity-sheet').classList.add('open');
+  if(typeof navigator.vibrate==='function')navigator.vibrate(20);
+  renderCardioHistoryOnToday(); // refresh sub labels
+}
+function closeActivitySheet(){
+  document.getElementById('activity-sheet').classList.remove('open');
+}
+
+// ── USER MENU (avatar tap) ──
+function openUserMenu(){
+  showConfirm('Signed in as '+currentUser,'What would you like to do?','Sign Out','danger',()=>{
+    clearSession();currentUser=null;exercises=null;workouts=[];bodyWeightLog=[];measurements=[];templates=[];userProfile=null;chatHistory=[];nutritionLog={};macroGoals={cal:2000,protein:150,fat:65,fibre:30};recentFoods=[];cardioSessions=[];showAuthScreen();
+  });
 }
 
 // ═══════════════════════════════════════════
@@ -4005,16 +4174,16 @@ const CARDIO_MILESTONES={
 const METS={run:{slow:8.3,moderate:9.8,fast:12.3,vfast:16},cycle:{slow:4,moderate:8,fast:12,vfast:16},walk:{slow:2.5,moderate:3.5,fast:4.5,vfast:5.5}};
 
 function openCardioTracker(mode='run'){
-  cardioMode=mode;cardioState='idle';cardioRoute=[];cardioLaps=[];cardioLapStart={distance:0,time:0};cardioTotalDist=0;cardioCurrentSpeed=0;milestonesFired=new Set();cardioPausedTime=0;cardioPauseStart=null;
+  cardioMode=mode;cardioState='idle';cardioRoute=[];cardioLaps=[];cardioLapStart={distance:0,time:0};cardioTotalDist=0;cardioCurrentSpeed=0;milestonesFired=new Set();cardioPausedTime=0;cardioPauseStart=null;primaryMetric='distance';
   const el=document.getElementById('cardio-tracker');el.classList.add('open');
   setCardioMode(mode);
-  document.getElementById('cardio-date-label').textContent=new Date().toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'});
-  const defaultNames={run:'MORNING RUN',cycle:'MORNING RIDE',walk:'MORNING WALK'};
   const h=new Date().getHours();const prefix=h<12?'MORNING':h<17?'AFTERNOON':'EVENING';
   document.getElementById('cardio-title-input').value=prefix+' '+(mode==='run'?'RUN':mode==='cycle'?'RIDE':'WALK');
   resetCardioUI();
+  // Wake lock keeps the screen on during activity (Android Chrome + iOS 16.4+)
+  requestWakeLock();
   initMap();
-  startGPS();
+  checkLocationPermissionThenStart();
 }
 
 function closeCardioTracker(){
@@ -4023,93 +4192,214 @@ function closeCardioTracker(){
   } else _closeCardio();
 }
 function _closeCardio(){
-  stopGPS();stopTimer();
+  stopGPS();stopTimer();releaseWakeLock();
   document.getElementById('cardio-tracker').classList.remove('open');
-  cardioState='idle';map=null;mapPolyline=null;mapMarker=null;
+  cardioState='idle';
+  if(map){try{map.remove()}catch(e){}}
+  map=null;mapPolyline=null;mapMarker=null;mapUserMarker=null;mapAccuracyCircle=null;
 }
 
 function setCardioMode(mode){
   cardioMode=mode;
-  document.querySelectorAll('.cardio-mode-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.ct-mode-pill').forEach(b=>b.classList.remove('active'));
   const btn=document.getElementById('cardio-mode-'+mode);if(btn)btn.classList.add('active');
   const modeLabel={run:'Min/km',cycle:'km/h',walk:'Min/km'};
-  const cadenceLabel={run:'spm',cycle:'rpm',walk:'spm'};
   const el=document.getElementById('csc-pace-label');if(el)el.textContent=modeLabel[mode]||'Pace';
-  const cl=document.getElementById('csc-cadence-label');if(cl)cl.textContent=cadenceLabel[mode]||'Cadence';
 }
 
 function resetCardioUI(){
-  document.getElementById('cardio-big-num').innerHTML='0<span class="unit" id="cardio-big-unit">km</span>';
+  document.getElementById('cardio-big-num').textContent='0.00';
+  document.getElementById('cardio-big-unit').textContent=' km';
   document.getElementById('cardio-big-label').textContent='DISTANCE';
   document.getElementById('csc-time').textContent='0:00';
   document.getElementById('csc-pace').textContent='—';
   document.getElementById('csc-cal').textContent='0';
-  document.getElementById('csc-cadence').textContent='—';
   document.getElementById('lap-strip').innerHTML='';
-  document.getElementById('cardio-main-btn').className='cardio-ctrl-btn start';
+  const mainBtn=document.getElementById('cardio-main-btn');
+  mainBtn.className='ct-btn-main start';
   document.getElementById('cardio-main-icon').innerHTML='<polygon points="5 3 19 12 5 21 5 3"/>';
   document.getElementById('cardio-main-label').textContent='START';
   document.getElementById('cardio-lap-btn').style.display='none';
   document.getElementById('cardio-stop-btn').style.display='none';
-  document.getElementById('pace-zone-badge').style.display='none';
-  document.getElementById('map-recenter-btn').style.display='none';
+  document.getElementById('pace-zone-badge').classList.remove('show');
+  document.getElementById('map-recenter-btn').classList.remove('show');
+  const loading=document.getElementById('ct-map-loading');if(loading)loading.classList.remove('hidden');
+  const bigStatus=document.getElementById('ct-gps-status-big');if(bigStatus)bigStatus.textContent='FINDING YOU…';
+}
+
+// Tap the big number to cycle which metric is primary
+let primaryMetric='distance';
+function cyclePrimaryMetric(){
+  const order=['distance','time','pace'];
+  primaryMetric=order[(order.indexOf(primaryMetric)+1)%order.length];
+  if(typeof navigator.vibrate==='function')navigator.vibrate(15);
+  updateCardioUI();
+}
+
+// ── SCREEN WAKE LOCK (device integration) ──
+let wakeLock=null;
+async function requestWakeLock(){
+  try{
+    if('wakeLock' in navigator){
+      wakeLock=await navigator.wakeLock.request('screen');
+      // Re-acquire if tab becomes visible again
+      document.addEventListener('visibilitychange',reacquireWakeLock);
+    }
+  }catch(e){/* not supported or denied — non-fatal */}
+}
+async function reacquireWakeLock(){
+  if(document.visibilityState==='visible'&&(cardioState==='active'||cardioState==='paused')){
+    try{wakeLock=await navigator.wakeLock.request('screen')}catch(e){}
+  }
+}
+function releaseWakeLock(){
+  try{wakeLock?.release();wakeLock=null;document.removeEventListener('visibilitychange',reacquireWakeLock)}catch(e){}
+}
+
+// ── LOCATION PERMISSION (device settings integration) ──
+async function checkLocationPermissionThenStart(){
+  const bigStatus=document.getElementById('ct-gps-status-big');
+  const subStatus=document.getElementById('ct-gps-status-sub');
+  if(!navigator.geolocation){
+    if(bigStatus)bigStatus.textContent='NO GPS AVAILABLE';
+    if(subStatus)subStatus.innerHTML='This device doesn\'t support location.<br>You can still time your session manually.';
+    updateGPSPill('poor','No GPS');
+    hideMapLoading();
+    return;
+  }
+  // Use the Permissions API to check state before requesting
+  if(navigator.permissions&&navigator.permissions.query){
+    try{
+      const perm=await navigator.permissions.query({name:'geolocation'});
+      if(perm.state==='denied'){
+        if(bigStatus)bigStatus.textContent='LOCATION BLOCKED';
+        if(subStatus)subStatus.innerHTML='Location is turned off for this app.<br><b style="color:#fff">iPhone:</b> Settings → Privacy → Location Services<br><b style="color:#fff">Android:</b> Settings → Apps → Chrome → Permissions';
+        updateGPSPill('poor','Blocked');
+        return;
+      }
+      // React live if the user grants/revokes from settings
+      perm.onchange=()=>{
+        if(perm.state==='granted')startGPS();
+      };
+    }catch(e){/* permissions API not available for geolocation on some browsers */}
+  }
+  startGPS();
 }
 
 // ── GPS ──
 function startGPS(){
-  if(!navigator.geolocation){updateGPSPill('bad','No GPS');return}
-  updateGPSPill('wait','Locating…');
-  cardioWatchId=navigator.geolocation.watchPosition(onGPSUpdate,onGPSError,{enableHighAccuracy:true,maximumAge:1000,timeout:15000});
+  updateGPSPill('searching','Locating…');
+  // 1) Immediate cached fix (maximumAge: Infinity) to centre the map instantly
+  navigator.geolocation.getCurrentPosition(pos=>{
+    centerMapOnDevice(pos,false);
+  },()=>{},{enableHighAccuracy:false,maximumAge:Infinity,timeout:3000});
+  // 2) Fresh high-accuracy fix — this is the authoritative device location
+  navigator.geolocation.getCurrentPosition(pos=>{
+    centerMapOnDevice(pos,true);
+  },err=>{
+    handleGPSError(err);
+  },{enableHighAccuracy:true,maximumAge:0,timeout:20000});
+  // 3) Continuous watch for tracking
+  if(cardioWatchId!=null)navigator.geolocation.clearWatch(cardioWatchId);
+  cardioWatchId=navigator.geolocation.watchPosition(onGPSUpdate,handleGPSError,{enableHighAccuracy:true,maximumAge:0,timeout:20000});
 }
 function stopGPS(){if(cardioWatchId!=null){navigator.geolocation.clearWatch(cardioWatchId);cardioWatchId=null}}
 
+function centerMapOnDevice(pos,isAccurate){
+  const{latitude:lat,longitude:lng,accuracy}=pos.coords;
+  lastKnownPos={lat,lng,accuracy};
+  hideMapLoading();
+  if(map){
+    map.setView([lat,lng],isAccurate?17:15,{animate:true});
+    updateUserMarker(lat,lng,accuracy);
+  } else {
+    // Map not ready yet — stash for when it initialises
+    pendingCenter={lat,lng,zoom:isAccurate?17:15};
+  }
+  if(isAccurate){
+    if(accuracy<=15)updateGPSPill('good',`GPS ±${Math.round(accuracy)}m`);
+    else if(accuracy<=40)updateGPSPill('ok',`GPS ±${Math.round(accuracy)}m`);
+    else updateGPSPill('poor',`GPS ±${Math.round(accuracy)}m`);
+  }
+}
+
+function handleGPSError(err){
+  const bigStatus=document.getElementById('ct-gps-status-big');
+  const subStatus=document.getElementById('ct-gps-status-sub');
+  if(err&&err.code===1){ // PERMISSION_DENIED
+    if(bigStatus)bigStatus.textContent='LOCATION BLOCKED';
+    if(subStatus)subStatus.innerHTML='Please allow location access:<br><b style="color:#fff">iPhone:</b> Settings → Privacy & Security → Location Services → your browser → "While Using"<br><b style="color:#fff">Android:</b> Settings → Location → App permissions';
+    updateGPSPill('poor','Blocked');
+  } else if(err&&err.code===2){ // POSITION_UNAVAILABLE
+    updateGPSPill('poor','No signal');
+    if(bigStatus)bigStatus.textContent='NO GPS SIGNAL';
+    if(subStatus)subStatus.textContent='Move outdoors or near a window for better signal.';
+  } else { // TIMEOUT or unknown
+    updateGPSPill('searching','Retrying…');
+    // Keep trying — retry a fresh fix
+    setTimeout(()=>{
+      if(document.getElementById('cardio-tracker').classList.contains('open')){
+        navigator.geolocation.getCurrentPosition(pos=>centerMapOnDevice(pos,true),()=>{},{enableHighAccuracy:true,maximumAge:0,timeout:20000});
+      }
+    },3000);
+  }
+}
+
+function hideMapLoading(){
+  const loading=document.getElementById('ct-map-loading');
+  if(loading)loading.classList.add('hidden');
+}
+
+let lastKnownPos=null;
+let pendingCenter=null;
+let mapAccuracyCircle=null;
+
 function onGPSUpdate(pos){
-  const{latitude:lat,longitude:lng,accuracy,speed}=pos.coords;
-  // Update accuracy pill
-  if(accuracy<=15)updateGPSPill('good',`±${Math.round(accuracy)}m`);
-  else if(accuracy<=40)updateGPSPill('ok',`±${Math.round(accuracy)}m`);
-  else updateGPSPill('bad',`±${Math.round(accuracy)}m`);
-  // Show recenter btn once we have location
-  document.getElementById('map-recenter-btn').style.display='flex';
-  // Update map
-  updateMapPosition(lat,lng);
+  const{latitude:lat,longitude:lng,accuracy,speed,heading}=pos.coords;
+  lastKnownPos={lat,lng,accuracy};
+  hideMapLoading();
+  // Accuracy pill
+  if(accuracy<=15)updateGPSPill('good',`GPS ±${Math.round(accuracy)}m`);
+  else if(accuracy<=40)updateGPSPill('ok',`GPS ±${Math.round(accuracy)}m`);
+  else updateGPSPill('poor',`GPS ±${Math.round(accuracy)}m`);
+  document.getElementById('map-recenter-btn').classList.add('show');
+  // Always keep the user marker on the device position
+  updateUserMarker(lat,lng,accuracy);
+  // Follow the device if auto-centering
+  if(autoCenter&&map)map.panTo([lat,lng],{animate:true,duration:.5});
+
   if(cardioState==='active'){
     const ts=Date.now();
-    // Filter noisy points
-    if(accuracy>50){return}
+    if(accuracy>50)return; // too noisy to trust for distance
     const lastPt=cardioRoute[cardioRoute.length-1];
     let dist=0;
     if(lastPt){
       dist=haversine(lastPt.lat,lastPt.lng,lat,lng);
-      // Sanity check: ignore points > 50m/s (GPS glitch)
       const dt=(ts-lastPt.ts)/1000;
-      if(dt>0&&dist/dt>50)return;
+      if(dt>0&&dist/dt>50)return; // >180km/h — GPS glitch
     }
     cardioRoute.push({lat,lng,ts,speed:speed||0,accuracy});
     if(lastPt&&dist>1){
       cardioTotalDist+=dist;
-      if(speed!=null)cardioCurrentSpeed=speed;
-      else if(lastPt){
-        const dt=(ts-lastPt.ts)/1000;
-        cardioCurrentSpeed=dt>0?dist/dt:cardioCurrentSpeed;
-      }
+      if(speed!=null&&speed>=0)cardioCurrentSpeed=speed;
+      else{const dt=(ts-lastPt.ts)/1000;if(dt>0)cardioCurrentSpeed=dist/dt}
       drawRouteOnMap();
       checkMilestones();
+      renderLapStrip();
     }
   }
 }
-function onGPSError(err){updateGPSPill('bad','GPS error')}
+
 function updateGPSPill(status,text){
   const dot=document.getElementById('gps-dot');const lbl=document.getElementById('gps-label');
   if(dot)dot.className='gps-dot '+status;if(lbl)lbl.textContent=text;
 }
 
-// ── MAP (Leaflet via CDN) ──
+// ── MAP (Leaflet via CDN — colour OpenStreetMap tiles) ──
 function initMap(){
   const mapEl=document.getElementById('cardio-map');
   if(!mapEl)return;
   mapEl.innerHTML='';
-  // Load Leaflet dynamically
   if(!window.L){
     const css=document.createElement('link');css.rel='stylesheet';css.href='https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css';document.head.appendChild(css);
     const script=document.createElement('script');script.src='https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js';
@@ -4122,44 +4412,61 @@ function initMap(){
 function initLeafletMap(){
   if(!window.L)return;
   const mapEl=document.getElementById('cardio-map');if(!mapEl)return;
-  const loadMsg=document.getElementById('map-loading-msg');if(loadMsg)loadMsg.style.display='none';
-  map=L.map('cardio-map',{zoomControl:false,attributionControl:false}).setView([51.5074,-0.1278],14);
-  // Dark tile layer
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{maxZoom:19}).addTo(map);
-  // Route polyline
-  mapPolyline=L.polyline([],{color:'#e8f020',weight:4,opacity:.9}).addTo(map);
-  // User position marker
-  const markerIcon=L.divIcon({html:`<div style="width:14px;height:14px;border-radius:50%;background:#e8f020;border:3px solid #fff;box-shadow:0 0 10px rgba(232,240,32,.6)"></div>`,iconSize:[14,14],iconAnchor:[7,7],className:''});
-  mapUserMarker=L.marker([51.5074,-0.1278],{icon:markerIcon}).addTo(map);
-  // Try to get current position to center map
-  navigator.geolocation.getCurrentPosition(pos=>{
-    const{latitude:lat,longitude:lng}=pos.coords;
-    map.setView([lat,lng],16);
-    mapUserMarker.setLatLng([lat,lng]);
-  },()=>{},{enableHighAccuracy:true,timeout:5000});
+  // Start on last known position if available, else world view until GPS arrives
+  const startPos=lastKnownPos?[lastKnownPos.lat,lastKnownPos.lng]:[20,0];
+  const startZoom=lastKnownPos?16:2;
+  map=L.map('cardio-map',{zoomControl:false,attributionControl:false}).setView(startPos,startZoom);
+  // COLOUR tiles — standard OpenStreetMap (full colour, streets, parks, water)
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(map);
+  // Route polyline — vivid blue with white casing for visibility on colour map
+  mapPolylineCasing=L.polyline([],{color:'#ffffff',weight:8,opacity:.9}).addTo(map);
+  mapPolyline=L.polyline([],{color:'#2f6fff',weight:5,opacity:1}).addTo(map);
+  // Pulsing blue-dot user marker (like Google/Apple Maps)
+  const markerIcon=L.divIcon({html:`
+    <div style="position:relative;width:22px;height:22px">
+      <div style="position:absolute;inset:-9px;border-radius:50%;background:rgba(47,111,255,.25);animation:gpsPulse 2s ease-in-out infinite"></div>
+      <div style="position:absolute;inset:0;border-radius:50%;background:#2f6fff;border:3px solid #fff;box-shadow:0 1px 6px rgba(0,0,0,.4)"></div>
+    </div>`,iconSize:[22,22],iconAnchor:[11,11],className:''});
+  mapUserMarker=L.marker(startPos,{icon:markerIcon}).addTo(map);
+  // Accuracy circle
+  mapAccuracyCircle=L.circle(startPos,{radius:0,color:'#2f6fff',weight:1,opacity:.4,fillColor:'#2f6fff',fillOpacity:.08}).addTo(map);
+  // Pending centre from a GPS fix that arrived before map was ready
+  if(pendingCenter){
+    map.setView([pendingCenter.lat,pendingCenter.lng],pendingCenter.zoom);
+    updateUserMarker(pendingCenter.lat,pendingCenter.lng,20);
+    pendingCenter=null;
+    hideMapLoading();
+  }
+  // Disable auto-follow when the user drags the map
+  map.on('dragstart',()=>{autoCenter=false});
+  // If GPS already has a fix, jump straight there
+  if(lastKnownPos)hideMapLoading();
 }
 
-function updateMapPosition(lat,lng){
+let mapPolylineCasing=null;
+
+function updateUserMarker(lat,lng,accuracy){
   if(!map||!window.L)return;
   mapUserMarker?.setLatLng([lat,lng]);
+  if(mapAccuracyCircle){mapAccuracyCircle.setLatLng([lat,lng]);mapAccuracyCircle.setRadius(accuracy||0)}
 }
 
 function drawRouteOnMap(){
   if(!map||!mapPolyline||!cardioRoute.length)return;
   const latlngs=cardioRoute.map(p=>[p.lat,p.lng]);
   mapPolyline.setLatLngs(latlngs);
+  if(mapPolylineCasing)mapPolylineCasing.setLatLngs(latlngs);
   const last=cardioRoute[cardioRoute.length-1];
-  mapUserMarker?.setLatLng([last.lat,last.lng]);
-  if(autoCenter)map.panTo([last.lat,last.lng],{animate:true,duration:.5});
+  updateUserMarker(last.lat,last.lng,last.accuracy);
 }
 
 let autoCenter=true;
 function recenterMap(){
   autoCenter=true;
-  if(cardioRoute.length){const last=cardioRoute[cardioRoute.length-1];map?.panTo([last.lat,last.lng])}
+  if(typeof navigator.vibrate==='function')navigator.vibrate(15);
+  const target=cardioRoute.length?cardioRoute[cardioRoute.length-1]:lastKnownPos;
+  if(target&&map)map.setView([target.lat,target.lng],Math.max(map.getZoom(),16),{animate:true});
 }
-
-map?.on('dragstart',()=>{autoCenter=false});
 
 // ── TIMER / CORE ──
 function cardioMainAction(){
@@ -4172,12 +4479,12 @@ function startCardio(){
   cardioState='active';cardioStartTime=Date.now();cardioPausedTime=0;
   startTimer();
   const btn=document.getElementById('cardio-main-btn');
-  btn.className='cardio-ctrl-btn pause';
+  btn.className='ct-btn-main pause';
   document.getElementById('cardio-main-icon').innerHTML='<rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/>';
   document.getElementById('cardio-main-label').textContent='PAUSE';
   document.getElementById('cardio-lap-btn').style.display='flex';
   document.getElementById('cardio-stop-btn').style.display='flex';
-  document.getElementById('cardio-back-btn').style.display='none';
+  autoCenter=true;
   if(typeof navigator.vibrate==='function')navigator.vibrate([100,50,100]);
   showToast('Activity started! 🏃','success');
 }
@@ -4185,7 +4492,7 @@ function startCardio(){
 function pauseCardio(){
   cardioState='paused';cardioPauseStart=Date.now();stopTimer();
   const btn=document.getElementById('cardio-main-btn');
-  btn.className='cardio-ctrl-btn resume';
+  btn.className='ct-btn-main resume';
   document.getElementById('cardio-main-icon').innerHTML='<polygon points="5 3 19 12 5 21 5 3"/>';
   document.getElementById('cardio-main-label').textContent='RESUME';
   if(typeof navigator.vibrate==='function')navigator.vibrate(80);
@@ -4195,7 +4502,7 @@ function resumeCardio(){
   cardioPausedTime+=(Date.now()-cardioPauseStart);cardioPauseStart=null;
   cardioState='active';startTimer();
   const btn=document.getElementById('cardio-main-btn');
-  btn.className='cardio-ctrl-btn pause';
+  btn.className='ct-btn-main pause';
   document.getElementById('cardio-main-icon').innerHTML='<rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/>';
   document.getElementById('cardio-main-label').textContent='PAUSE';
   if(typeof navigator.vibrate==='function')navigator.vibrate([50,30,50]);
@@ -4203,7 +4510,7 @@ function resumeCardio(){
 
 function stopCardio(){
   showConfirm('Finish Activity?','Save this session to your log?','Finish','primary',()=>{
-    pauseCardio();stopTimer();stopGPS();
+    pauseCardio();stopTimer();stopGPS();releaseWakeLock();
     buildCardioSummary();
   });
 }
@@ -4222,64 +4529,73 @@ function updateCardioUI(){
   const elapsedMs=getElapsedMs();
   const elapsedSec=elapsedMs/1000;
   const distKm=cardioTotalDist/1000;
-  // Big number = distance
+  // Primary metric — user can cycle between distance/time/pace by tapping
   const bigEl=document.getElementById('cardio-big-num');
-  if(bigEl)bigEl.innerHTML=distKm.toFixed(2)+'<span class="unit" id="cardio-big-unit">km</span>';
-  // Time
+  const bigUnit=document.getElementById('cardio-big-unit');
+  const bigLabel=document.getElementById('cardio-big-label');
+  const avgPaceSec=cardioTotalDist>50&&elapsedSec>5?elapsedSec/(cardioTotalDist/1000):0;
+  if(primaryMetric==='distance'){
+    if(bigEl)bigEl.textContent=distKm.toFixed(2);
+    if(bigUnit)bigUnit.textContent=' km';
+    if(bigLabel)bigLabel.textContent='DISTANCE';
+  }else if(primaryMetric==='time'){
+    if(bigEl)bigEl.textContent=fmtDuration(elapsedSec);
+    if(bigUnit)bigUnit.textContent='';
+    if(bigLabel)bigLabel.textContent='DURATION';
+  }else{
+    if(cardioMode==='cycle'){
+      if(bigEl)bigEl.textContent=(cardioCurrentSpeed*3.6).toFixed(1);
+      if(bigUnit)bigUnit.textContent=' km/h';
+      if(bigLabel)bigLabel.textContent='SPEED';
+    }else{
+      if(bigEl)bigEl.textContent=avgPaceSec>0?fmtPace(avgPaceSec):'—';
+      if(bigUnit)bigUnit.textContent=avgPaceSec>0?' /km':'';
+      if(bigLabel)bigLabel.textContent='AVG PACE';
+    }
+  }
+  // Time cell
   document.getElementById('csc-time').textContent=fmtDuration(elapsedSec);
-  // Pace / speed
+  // Pace / speed cell
   const paceEl=document.getElementById('csc-pace');
   if(cardioMode==='cycle'){
     const kph=cardioCurrentSpeed*3.6;
     if(paceEl)paceEl.textContent=kph>0?kph.toFixed(1):'—';
   } else {
-    if(cardioTotalDist>50&&elapsedSec>5){
-      const paceSecPerKm=(elapsedSec/(cardioTotalDist/1000));
-      if(paceEl)paceEl.textContent=fmtPace(paceSecPerKm);
-    } else {if(paceEl)paceEl.textContent='—'}
+    if(paceEl)paceEl.textContent=avgPaceSec>0?fmtPace(avgPaceSec):'—';
   }
   // Calories
   const cals=estimateCalories(cardioTotalDist,elapsedSec,cardioMode);
   document.getElementById('csc-cal').textContent=Math.round(cals);
-  // Cadence estimate (approximation from steps)
-  if(cardioMode==='run'||cardioMode==='walk'){
-    const stepRate=cardioCurrentSpeed>0?Math.round(cardioCurrentSpeed*180/3):0;
-    document.getElementById('csc-cadence').textContent=stepRate>0?stepRate:'—';
-  } else {
-    const rpm=cardioCurrentSpeed>0?Math.round(cardioCurrentSpeed*60/6):0;
-    document.getElementById('csc-cadence').textContent=rpm>0?rpm:'—';
-  }
   // Pace zone
   updatePaceZone();
 }
 
 function updatePaceZone(){
-  if(cardioCurrentSpeed<0.3){document.getElementById('pace-zone-badge').style.display='none';return}
-  document.getElementById('pace-zone-badge').style.display='block';
+  const badge=document.getElementById('pace-zone-badge');
+  if(cardioCurrentSpeed<0.3||cardioState!=='active'){badge.classList.remove('show');return}
+  badge.classList.add('show');
   const mps=cardioCurrentSpeed;
-  let zone,name,label,cls;
+  let name,cls;
   if(cardioMode==='run'){
-    if(mps<2.2){zone=1;name='Zone 1';label='Recovery';cls='zone-z1'}
-    else if(mps<3.0){zone=2;name='Zone 2';label='Aerobic';cls='zone-z2'}
-    else if(mps<3.8){zone=3;name='Zone 3';label='Tempo';cls='zone-z3'}
-    else if(mps<4.5){zone=4;name='Zone 4';label='Threshold';cls='zone-z4'}
-    else{zone=5;name='Zone 5';label='VO2 Max';cls='zone-z5'}
+    if(mps<2.2){name='Z1 · Recovery';cls='zone-z1'}
+    else if(mps<3.0){name='Z2 · Aerobic';cls='zone-z2'}
+    else if(mps<3.8){name='Z3 · Tempo';cls='zone-z3'}
+    else if(mps<4.5){name='Z4 · Threshold';cls='zone-z4'}
+    else{name='Z5 · VO2 Max';cls='zone-z5'}
   } else if(cardioMode==='cycle'){
     const kph=mps*3.6;
-    if(kph<15){zone=1;name='Easy';label='Recovery';cls='zone-z1'}
-    else if(kph<25){zone=2;name='Moderate';label='Aerobic';cls='zone-z2'}
-    else if(kph<32){zone=3;name='Brisk';label='Tempo';cls='zone-z3'}
-    else if(kph<40){zone=4;name='Hard';label='Threshold';cls='zone-z4'}
-    else{zone=5;name='Race Pace';label='VO2 Max';cls='zone-z5'}
+    if(kph<15){name='Easy';cls='zone-z1'}
+    else if(kph<25){name='Moderate';cls='zone-z2'}
+    else if(kph<32){name='Brisk';cls='zone-z3'}
+    else if(kph<40){name='Hard';cls='zone-z4'}
+    else{name='Race Pace';cls='zone-z5'}
   } else {
-    if(mps<1.1){zone=1;name='Stroll';label='Easy';cls='zone-z1'}
-    else if(mps<1.5){zone=2;name='Brisk Walk';label='Active';cls='zone-z2'}
-    else{zone=3;name='Power Walk';label='Vigorous';cls='zone-z3'}
+    if(mps<1.1){name='Stroll';cls='zone-z1'}
+    else if(mps<1.5){name='Brisk';cls='zone-z2'}
+    else{name='Power Walk';cls='zone-z3'}
   }
-  const badge=document.getElementById('pace-zone-badge');
-  badge.className=`pace-zone-badge ${cls}`;
+  badge.className=`ct-zone-pill show ${cls}`;
   document.getElementById('pace-zone-name').textContent=name;
-  document.getElementById('pace-zone-label').textContent=label;
 }
 
 function markLap(){
@@ -4297,22 +4613,23 @@ function markLap(){
 
 function renderLapStrip(){
   const strip=document.getElementById('lap-strip');if(!strip)return;
+  if(!cardioLaps.length&&cardioState!=='active'){strip.innerHTML='';return}
   strip.innerHTML='';
   const elapsedSec=getElapsedMs()/1000;
   const curLapDist=cardioTotalDist-cardioLapStart.distance;
   const curLapTime=elapsedSec-cardioLapStart.time;
-  // Show last 5 laps + current
   const recent=cardioLaps.slice(-5);
   recent.forEach(lap=>{
-    const chip=document.createElement('div');chip.className='lap-chip';
-    chip.innerHTML=`<div class="lap-chip-num">Lap ${lap.number}</div><div class="lap-chip-time">${fmtDuration(lap.duration)}</div><div class="lap-chip-pace">${fmtPace(lap.pace)}/km</div>`;
+    const chip=document.createElement('div');chip.className='ct-lap-chip';
+    chip.innerHTML=`<div class="ct-lap-num">Lap ${lap.number}</div><div class="ct-lap-time">${fmtDuration(lap.duration)}</div><div class="ct-lap-pace">${fmtPace(lap.pace)}/km</div>`;
     strip.appendChild(chip);
   });
-  // Current lap
-  const curChip=document.createElement('div');curChip.className='lap-chip current';
-  const curPace=curLapDist>50?curLapTime/(curLapDist/1000):0;
-  curChip.innerHTML=`<div class="lap-chip-num">Current</div><div class="lap-chip-time">${fmtDuration(curLapTime)}</div><div class="lap-chip-pace">${curPace>0?fmtPace(curPace)+'/km':'—'}</div>`;
-  strip.appendChild(curChip);
+  if(cardioState==='active'||cardioState==='paused'){
+    const curChip=document.createElement('div');curChip.className='ct-lap-chip active';
+    const curPace=curLapDist>50?curLapTime/(curLapDist/1000):0;
+    curChip.innerHTML=`<div class="ct-lap-num">Current</div><div class="ct-lap-time">${fmtDuration(curLapTime)}</div><div class="ct-lap-pace">${curPace>0?fmtPace(curPace)+'/km':'—'}</div>`;
+    strip.appendChild(curChip);
+  }
   strip.scrollLeft=strip.scrollWidth;
 }
 
@@ -4387,10 +4704,10 @@ function buildCardioSummary(){
   // Stats grid
   const statsGrid=document.getElementById('sum-stats-grid');
   statsGrid.innerHTML=`
-    <div class="cardio-sum-stat"><div class="css-val">${distKm.toFixed(2)}</div><div class="css-label">km</div></div>
-    <div class="cardio-sum-stat"><div class="css-val">${fmtDuration(elapsedSec)}</div><div class="css-label">Duration</div></div>
-    <div class="cardio-sum-stat"><div class="css-val">${Math.round(cals)}</div><div class="css-label">Calories</div></div>
-    <div class="cardio-sum-stat"><div class="css-val">${cardioMode==='cycle'?avgSpeed.toFixed(1)+'kph':fmtPace(avgPace)}</div><div class="css-label">Avg ${cardioMode==='cycle'?'Speed':'Pace'}</div></div>`;
+    <div class="sum-stat-card accent"><div class="sum-stat-val">${distKm.toFixed(2)}</div><div class="sum-stat-label">km</div></div>
+    <div class="sum-stat-card"><div class="sum-stat-val">${fmtDuration(elapsedSec)}</div><div class="sum-stat-label">Duration</div></div>
+    <div class="sum-stat-card"><div class="sum-stat-val">${Math.round(cals)}</div><div class="sum-stat-label">Calories</div></div>
+    <div class="sum-stat-card"><div class="sum-stat-val">${cardioMode==='cycle'?avgSpeed.toFixed(1)+'kph':fmtPace(avgPace)}</div><div class="sum-stat-label">Avg ${cardioMode==='cycle'?'Speed':'Pace'}</div></div>`;
 
   // Route mini-map
   drawStaticRoute();
@@ -4419,11 +4736,11 @@ function buildCardioSummary(){
 
   // Details
   document.getElementById('sum-details').innerHTML=`
-    <div class="cardio-sum-row"><span class="cardio-sum-key">Activity</span><span class="cardio-sum-val">${title}</span></div>
-    <div class="cardio-sum-row"><span class="cardio-sum-key">Mode</span><span class="cardio-sum-val">${cardioMode.charAt(0).toUpperCase()+cardioMode.slice(1)}</span></div>
-    ${maxSpeed>0?`<div class="cardio-sum-row"><span class="cardio-sum-key">Max Speed</span><span class="cardio-sum-val">${maxSpeed.toFixed(1)} km/h</span></div>`:''}
-    <div class="cardio-sum-row"><span class="cardio-sum-key">GPS Points</span><span class="cardio-sum-val">${cardioRoute.length}</span></div>
-    <div class="cardio-sum-row"><span class="cardio-sum-key">Afterburn</span><span class="cardio-sum-val">+${epoc} kcal (est.)</span></div>`;
+    <div class="sum-row"><span class="sum-key">Activity</span><span class="sum-val">${title}</span></div>
+    <div class="sum-row"><span class="sum-key">Mode</span><span class="sum-val">${cardioMode.charAt(0).toUpperCase()+cardioMode.slice(1)}</span></div>
+    ${maxSpeed>0?`<div class="sum-row"><span class="sum-key">Max Speed</span><span class="sum-val">${maxSpeed.toFixed(1)} km/h</span></div>`:''}
+    <div class="sum-row"><span class="sum-key">GPS Points</span><span class="sum-val">${cardioRoute.length}</span></div>
+    <div class="sum-row"><span class="sum-key">Afterburn</span><span class="sum-val">+${epoc} kcal (est.)</span></div>`;
 
   // Show summary screen
   document.getElementById('cardio-tracker').classList.remove('open');
@@ -4435,28 +4752,42 @@ function buildCardioSummary(){
 
 function drawStaticRoute(){
   if(!cardioRoute.length){
-    document.getElementById('sum-route-map').innerHTML='<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--text3);font-weight:600">No route data</div>';
+    document.getElementById('sum-route-map').innerHTML='<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--text3);font-weight:600">No route data — GPS was unavailable</div>';
     return;
   }
   const canvas=document.getElementById('sum-route-canvas');if(!canvas)return;
-  const W=canvas.parentElement.offsetWidth||300,H=200;
-  canvas.width=W;canvas.height=H;
-  const ctx=canvas.getContext('2d');
-  ctx.fillStyle='#0d1117';ctx.fillRect(0,0,W,H);
+  const W=canvas.parentElement.offsetWidth||300,H=180;
+  canvas.width=W*2;canvas.height=H*2; // retina sharp
+  canvas.style.width=W+'px';canvas.style.height=H+'px';
+  const ctx=canvas.getContext('2d');ctx.scale(2,2);
+  // Light map-like background
+  ctx.fillStyle='#eef2e6';ctx.fillRect(0,0,W,H);
+  // Subtle grid to suggest streets
+  ctx.strokeStyle='rgba(0,0,0,.05)';ctx.lineWidth=1;
+  for(let x=0;x<W;x+=28){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke()}
+  for(let y=0;y<H;y+=28){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke()}
   const lats=cardioRoute.map(p=>p.lat);const lngs=cardioRoute.map(p=>p.lng);
   const minLat=Math.min(...lats);const maxLat=Math.max(...lats);
   const minLng=Math.min(...lngs);const maxLng=Math.max(...lngs);
-  const pad=20;
+  const pad=24;
   const toX=lng=>pad+(lng-minLng)/(maxLng-minLng||1)*(W-pad*2);
   const toY=lat=>pad+(maxLat-lat)/(maxLat-minLat||1)*(H-pad*2);
-  // Draw route
-  ctx.beginPath();ctx.strokeStyle='#e8f020';ctx.lineWidth=2.5;ctx.lineCap='round';ctx.lineJoin='round';
-  cardioRoute.forEach((p,i)=>{if(i===0)ctx.moveTo(toX(p.lng),toY(p.lat));else ctx.lineTo(toX(p.lng),toY(p.lat))});
+  // White casing then blue route (Strava style)
+  ctx.lineCap='round';ctx.lineJoin='round';
+  ctx.beginPath();ctx.strokeStyle='#ffffff';ctx.lineWidth=7;
+  cardioRoute.forEach((p,i)=>{i===0?ctx.moveTo(toX(p.lng),toY(p.lat)):ctx.lineTo(toX(p.lng),toY(p.lat))});
   ctx.stroke();
-  // Start dot
-  const sp=cardioRoute[0];ctx.fillStyle='#20e880';ctx.beginPath();ctx.arc(toX(sp.lng),toY(sp.lat),5,0,Math.PI*2);ctx.fill();
-  // End dot
-  const ep=cardioRoute[cardioRoute.length-1];ctx.fillStyle='#ff4060';ctx.beginPath();ctx.arc(toX(ep.lng),toY(ep.lat),5,0,Math.PI*2);ctx.fill();
+  ctx.beginPath();ctx.strokeStyle='#2f6fff';ctx.lineWidth=4;
+  cardioRoute.forEach((p,i)=>{i===0?ctx.moveTo(toX(p.lng),toY(p.lat)):ctx.lineTo(toX(p.lng),toY(p.lat))});
+  ctx.stroke();
+  // Start dot (green) with white ring
+  const sp=cardioRoute[0];
+  ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(toX(sp.lng),toY(sp.lat),7,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#16b860';ctx.beginPath();ctx.arc(toX(sp.lng),toY(sp.lat),5,0,Math.PI*2);ctx.fill();
+  // End dot (red/checkered finish)
+  const ep=cardioRoute[cardioRoute.length-1];
+  ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(toX(ep.lng),toY(ep.lat),7,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#e0304c';ctx.beginPath();ctx.arc(toX(ep.lng),toY(ep.lat),5,0,Math.PI*2);ctx.fill();
 }
 
 async function loadCardioAIInsight(session){
@@ -4516,13 +4847,16 @@ function renderCardioHistoryOnToday(){
       el.prepend(card);
     });
   }
-  // Update QL sub labels
+  // Update activity sheet sub labels with last session
   const runs=cardioSessions.filter(s=>s.mode==='run');
   const cycles=cardioSessions.filter(s=>s.mode==='cycle');
-  const qlRun=document.getElementById('ql-run-stat');
-  const qlCycle=document.getElementById('ql-cycle-stat');
-  if(qlRun&&runs.length){const last=runs[runs.length-1];qlRun.textContent=`Last: ${(last.distance/1000).toFixed(1)}km`;}
-  if(qlCycle&&cycles.length){const last=cycles[cycles.length-1];qlCycle.textContent=`Last: ${(last.distance/1000).toFixed(1)}km`;}
+  const walks=cardioSessions.filter(s=>s.mode==='walk');
+  const setSub=(id,arr,fallback)=>{const el=document.getElementById(id);if(!el)return;if(arr.length){const last=arr[arr.length-1];el.textContent=`Last: ${(last.distance/1000).toFixed(1)}km`}else el.textContent=fallback};
+  setSub('act-run-sub',runs,'GPS tracked');
+  setSub('act-cycle-sub',cycles,'Speed & route');
+  setSub('act-walk-sub',walks,'Steps & distance');
+  const gymSub=document.getElementById('act-gym-sub');
+  if(gymSub&&workouts.length)gymSub.textContent=`${workouts.length} sessions logged`;
 }
 
 // ── HELPERS ──
