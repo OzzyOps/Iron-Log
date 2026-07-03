@@ -219,7 +219,7 @@ b,strong{color:var(--bold-color);font-weight:700}
 .ct-big-tap-hint{font-size:9px;color:rgba(255,255,255,.25);font-family:'DM Mono',monospace;font-weight:600;margin-top:2px}
 
 /* 3-stat row */
-.ct-stat-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px}
+.ct-stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:14px}
 .ct-stat{background:rgba(255,255,255,.06);border-radius:10px;padding:9px 4px;text-align:center}
 .ct-stat-val{font-family:'Bebas Neue',sans-serif;font-size:22px;color:#fff;line-height:1}
 .ct-stat-label{font-size:8px;color:rgba(255,255,255,.4);font-family:'DM Mono',monospace;font-weight:700;letter-spacing:.07em;margin-top:2px;text-transform:uppercase}
@@ -1680,7 +1680,8 @@ b,strong{color:var(--bold-color);font-weight:700}
       <div class="ct-big-tap-hint">tap to switch metric</div>
     </div>
     <div class="ct-stat-row">
-      <div class="ct-stat"><div class="ct-stat-val" id="csc-time">0:00</div><div class="ct-stat-label">Time</div></div>
+      <div class="ct-stat"><div class="ct-stat-val" id="csc-time">0:00</div><div class="ct-stat-label" style="color:var(--accent)">Moving</div></div>
+      <div class="ct-stat"><div class="ct-stat-val" id="csc-total">0:00</div><div class="ct-stat-label">Total</div></div>
       <div class="ct-stat"><div class="ct-stat-val" id="csc-pace">—</div><div class="ct-stat-label" id="csc-pace-label">Min/km</div></div>
       <div class="ct-stat"><div class="ct-stat-val" id="csc-cal">0</div><div class="ct-stat-label">kcal</div></div>
     </div>
@@ -4175,6 +4176,7 @@ const METS={run:{slow:8.3,moderate:9.8,fast:12.3,vfast:16},cycle:{slow:4,moderat
 
 function openCardioTracker(mode='run'){
   cardioMode=mode;cardioState='idle';cardioRoute=[];cardioLaps=[];cardioLapStart={distance:0,time:0};cardioTotalDist=0;cardioCurrentSpeed=0;milestonesFired=new Set();cardioPausedTime=0;cardioPauseStart=null;primaryMetric='distance';
+  cardioMovingSec=0;cardioAutoPaused=false;lastGPSUpdateTs=0;
   const el=document.getElementById('cardio-tracker');el.classList.add('open');
   setCardioMode(mode);
   const h=new Date().getHours();const prefix=h<12?'MORNING':h<17?'AFTERNOON':'EVENING';
@@ -4212,6 +4214,7 @@ function resetCardioUI(){
   document.getElementById('cardio-big-unit').textContent=' km';
   document.getElementById('cardio-big-label').textContent='DISTANCE';
   document.getElementById('csc-time').textContent='0:00';
+  const totalReset=document.getElementById('csc-total');if(totalReset)totalReset.textContent='0:00';
   document.getElementById('csc-pace').textContent='—';
   document.getElementById('csc-cal').textContent='0';
   document.getElementById('lap-strip').innerHTML='';
@@ -4235,6 +4238,12 @@ function cyclePrimaryMetric(){
   if(typeof navigator.vibrate==='function')navigator.vibrate(15);
   updateCardioUI();
 }
+
+// ── AUTO-PAUSE / MOVING TIME (Strava-style) ──
+let cardioMovingSec=0;      // seconds of actual movement (exercise time)
+let cardioAutoPaused=false; // true when active but stationary
+let lastGPSUpdateTs=0;      // ts of last GPS fix — stale fixes mean we've stopped
+function haptic(pattern){if(typeof navigator.vibrate==='function')navigator.vibrate(pattern)}
 
 // ── SCREEN WAKE LOCK (device integration) ──
 let wakeLock=null;
@@ -4357,6 +4366,7 @@ let mapAccuracyCircle=null;
 function onGPSUpdate(pos){
   const{latitude:lat,longitude:lng,accuracy,speed,heading}=pos.coords;
   lastKnownPos={lat,lng,accuracy};
+  lastGPSUpdateTs=Date.now();
   hideMapLoading();
   // Accuracy pill
   if(accuracy<=15)updateGPSPill('good',`GPS ±${Math.round(accuracy)}m`);
@@ -4510,13 +4520,31 @@ function resumeCardio(){
 
 function stopCardio(){
   showConfirm('Finish Activity?','Save this session to your log?','Finish','primary',()=>{
-    pauseCardio();stopTimer();stopGPS();releaseWakeLock();
+    if(cardioState==='active')pauseCardio(); // don't double-pause if already paused
+    stopTimer();stopGPS();releaseWakeLock();
     buildCardioSummary();
   });
 }
 
-function startTimer(){cardioTimer=setInterval(updateCardioUI,1000)}
+function startTimer(){cardioTimer=setInterval(cardioTick,1000)}
 function stopTimer(){clearInterval(cardioTimer);cardioTimer=null}
+
+// Runs once per second while the activity is live: auto-pause detection + moving-time accrual, then render
+function cardioTick(){
+  // If the GPS hasn't reported for >6s, treat speed as zero (device stationary or signal lost)
+  if(Date.now()-lastGPSUpdateTs>6000)cardioCurrentSpeed=0;
+  const movingThreshold=cardioMode==='cycle'?1.0:0.5; // m/s — below this you're standing still
+  const isMoving=cardioState==='active'&&cardioCurrentSpeed>=movingThreshold;
+  if(cardioState==='active'){
+    if(isMoving){
+      cardioMovingSec++;
+      if(cardioAutoPaused){cardioAutoPaused=false;haptic(30)} // resumed moving
+    } else if(!cardioAutoPaused){
+      cardioAutoPaused=true;haptic([40,40,40]); // just stopped — auto-pause engaged
+    }
+  }
+  updateCardioUI();
+}
 
 function getElapsedMs(){
   if(!cardioStartTime)return 0;
@@ -4529,19 +4557,23 @@ function updateCardioUI(){
   const elapsedMs=getElapsedMs();
   const elapsedSec=elapsedMs/1000;
   const distKm=cardioTotalDist/1000;
+
+  // Moving time is the "exercise" time; pace & calories come from it
+  const movingSec=cardioMovingSec;
+  const avgPaceSec=cardioTotalDist>50&&movingSec>5?movingSec/(cardioTotalDist/1000):0;
+
   // Primary metric — user can cycle between distance/time/pace by tapping
   const bigEl=document.getElementById('cardio-big-num');
   const bigUnit=document.getElementById('cardio-big-unit');
   const bigLabel=document.getElementById('cardio-big-label');
-  const avgPaceSec=cardioTotalDist>50&&elapsedSec>5?elapsedSec/(cardioTotalDist/1000):0;
   if(primaryMetric==='distance'){
     if(bigEl)bigEl.textContent=distKm.toFixed(2);
     if(bigUnit)bigUnit.textContent=' km';
     if(bigLabel)bigLabel.textContent='DISTANCE';
   }else if(primaryMetric==='time'){
-    if(bigEl)bigEl.textContent=fmtDuration(elapsedSec);
+    if(bigEl)bigEl.textContent=fmtDuration(movingSec);
     if(bigUnit)bigUnit.textContent='';
-    if(bigLabel)bigLabel.textContent='DURATION';
+    if(bigLabel)bigLabel.textContent='MOVING TIME';
   }else{
     if(cardioMode==='cycle'){
       if(bigEl)bigEl.textContent=(cardioCurrentSpeed*3.6).toFixed(1);
@@ -4553,8 +4585,10 @@ function updateCardioUI(){
       if(bigLabel)bigLabel.textContent='AVG PACE';
     }
   }
-  // Time cell
-  document.getElementById('csc-time').textContent=fmtDuration(elapsedSec);
+  // Moving time cell + total elapsed cell
+  document.getElementById('csc-time').textContent=fmtDuration(movingSec);
+  const totalEl=document.getElementById('csc-total');
+  if(totalEl)totalEl.textContent=fmtDuration(elapsedSec);
   // Pace / speed cell
   const paceEl=document.getElementById('csc-pace');
   if(cardioMode==='cycle'){
@@ -4563,16 +4597,23 @@ function updateCardioUI(){
   } else {
     if(paceEl)paceEl.textContent=avgPaceSec>0?fmtPace(avgPaceSec):'—';
   }
-  // Calories
-  const cals=estimateCalories(cardioTotalDist,elapsedSec,cardioMode);
-  document.getElementById('csc-cal').textContent=Math.round(cals);
-  // Pace zone
+  // Calories — based on moving time (standing still burns nothing extra)
+  const cals=estimateCalories(cardioTotalDist,Math.max(movingSec,1),cardioMode);
+  document.getElementById('csc-cal').textContent=movingSec>0?Math.round(cals):0;
+  // Pace zone / auto-pause pill
   updatePaceZone();
 }
 
 function updatePaceZone(){
   const badge=document.getElementById('pace-zone-badge');
-  if(cardioCurrentSpeed<0.3||cardioState!=='active'){badge.classList.remove('show');return}
+  if(cardioState!=='active'){badge.classList.remove('show');return}
+  // Auto-paused: show a clear indicator instead of a zone
+  if(cardioAutoPaused){
+    badge.className='ct-zone-pill show zone-z4';
+    badge.innerHTML='⏸ AUTO-PAUSED';
+    return;
+  }
+  if(cardioCurrentSpeed<0.3){badge.classList.remove('show');return}
   badge.classList.add('show');
   const mps=cardioCurrentSpeed;
   let name,cls;
@@ -4595,7 +4636,7 @@ function updatePaceZone(){
     else{name='Power Walk';cls='zone-z3'}
   }
   badge.className=`ct-zone-pill show ${cls}`;
-  document.getElementById('pace-zone-name').textContent=name;
+  badge.innerHTML=`<span id="pace-zone-name">${name}</span>`;
 }
 
 function markLap(){
@@ -4683,71 +4724,80 @@ function estimateEPOC(calories,mode,durationMin){
 
 // ── SUMMARY ──
 function buildCardioSummary(){
-  const elapsedMs=getElapsedMs();const elapsedSec=elapsedMs/1000;
+  const elapsedMs=getElapsedMs();const elapsedSec=Math.max(elapsedMs/1000,1);
+  const movingSec=Math.max(cardioMovingSec,0);
+  const exerciseSec=movingSec>0?movingSec:elapsedSec; // fall back if GPS never registered movement
   const distKm=cardioTotalDist/1000;
-  const cals=estimateCalories(cardioTotalDist,elapsedSec,cardioMode);
-  const durationMin=elapsedSec/60;
-  const epoc=estimateEPOC(cals,cardioMode,durationMin);
-  const avgPace=distKm>0?elapsedSec/distKm:0;
-  const avgSpeed=(elapsedSec>0?distKm/(elapsedSec/3600):0);
+  const cals=estimateCalories(cardioTotalDist,exerciseSec,cardioMode);
+  const epoc=estimateEPOC(cals,cardioMode,exerciseSec/60);
+  const avgPace=distKm>0.01?exerciseSec/distKm:0;
+  const avgSpeed=exerciseSec>0?distKm/(exerciseSec/3600):0;
   const maxSpeed=cardioRoute.length?Math.max(...cardioRoute.map(p=>p.speed||0))*3.6:0;
+  const stoppedSec=Math.max(elapsedSec-movingSec,0);
   const title=document.getElementById('cardio-title-input')?.value||'Activity';
-  currentSession={id:'c'+Date.now(),mode:cardioMode,title,date:new Date().toISOString(),route:cardioRoute,laps:cardioLaps,distance:cardioTotalDist,duration:elapsedSec,calories:Math.round(cals),epoc,avgPace,avgSpeed,maxSpeed};
+  currentSession={id:'c'+Date.now(),mode:cardioMode,title,date:new Date().toISOString(),route:cardioRoute,laps:cardioLaps,distance:cardioTotalDist,duration:elapsedSec,movingTime:exerciseSec,calories:Math.round(cals),epoc,avgPace,avgSpeed,maxSpeed};
 
-  // Build summary UI
-  const icons={run:'🏃',cycle:'🚴',walk:'🚶'};
-  const titles={run:'RUN COMPLETE',cycle:'RIDE COMPLETE',walk:'WALK COMPLETE'};
-  document.getElementById('sum-mode-icon').textContent=icons[cardioMode]||'🏅';
-  document.getElementById('sum-title').textContent=titles[cardioMode]||'COMPLETE';
-  document.getElementById('sum-date').textContent=new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
-
-  // Stats grid
-  const statsGrid=document.getElementById('sum-stats-grid');
-  statsGrid.innerHTML=`
-    <div class="sum-stat-card accent"><div class="sum-stat-val">${distKm.toFixed(2)}</div><div class="sum-stat-label">km</div></div>
-    <div class="sum-stat-card"><div class="sum-stat-val">${fmtDuration(elapsedSec)}</div><div class="sum-stat-label">Duration</div></div>
-    <div class="sum-stat-card"><div class="sum-stat-val">${Math.round(cals)}</div><div class="sum-stat-label">Calories</div></div>
-    <div class="sum-stat-card"><div class="sum-stat-val">${cardioMode==='cycle'?avgSpeed.toFixed(1)+'kph':fmtPace(avgPace)}</div><div class="sum-stat-label">Avg ${cardioMode==='cycle'?'Speed':'Pace'}</div></div>`;
-
-  // Route mini-map
-  drawStaticRoute();
-
-  // Afterburn
-  if(epoc>0){
-    document.getElementById('sum-afterburn').style.display='block';
-    document.getElementById('sum-afterburn-val').textContent=epoc;
-    const weightKg=bodyWeightLog.length?bodyWeightLog[bodyWeightLog.length-1].weight:75;
-    const age=userProfile?.age||30;
-    document.getElementById('sum-afterburn-sub').textContent=`Based on ${age}yo, ${weightKg}kg. Your body will continue burning ~${epoc} extra kcal over the next 12–24 hours (EPOC effect).`;
-  }
-
-  // Laps
-  if(cardioLaps.length>0){
-    document.getElementById('sum-laps-section').style.display='block';
-    const bestLap=cardioLaps.reduce((b,l)=>l.pace<b.pace?l:b,cardioLaps[0]);
-    const table=document.getElementById('sum-lap-table');
-    table.innerHTML=`<tr><th>Lap</th><th>Dist</th><th>Time</th><th>Pace</th></tr>`;
-    cardioLaps.forEach(lap=>{
-      const tr=document.createElement('tr');const isBest=lap===bestLap;
-      tr.innerHTML=`<td class="${isBest?'lap-best':''}">${lap.number}${isBest?' ★':''}</td><td>${(lap.distance/1000).toFixed(2)}km</td><td>${fmtDuration(lap.duration)}</td><td class="${isBest?'lap-best':''}">${fmtPace(lap.pace)}/km</td>`;
-      table.appendChild(tr);
-    });
-  }
-
-  // Details
-  document.getElementById('sum-details').innerHTML=`
-    <div class="sum-row"><span class="sum-key">Activity</span><span class="sum-val">${title}</span></div>
-    <div class="sum-row"><span class="sum-key">Mode</span><span class="sum-val">${cardioMode.charAt(0).toUpperCase()+cardioMode.slice(1)}</span></div>
-    ${maxSpeed>0?`<div class="sum-row"><span class="sum-key">Max Speed</span><span class="sum-val">${maxSpeed.toFixed(1)} km/h</span></div>`:''}
-    <div class="sum-row"><span class="sum-key">GPS Points</span><span class="sum-val">${cardioRoute.length}</span></div>
-    <div class="sum-row"><span class="sum-key">Afterburn</span><span class="sum-val">+${epoc} kcal (est.)</span></div>`;
-
-  // Show summary screen
+  // Switch screens FIRST — even if a render step below hiccups, the user can always save
   document.getElementById('cardio-tracker').classList.remove('open');
   document.getElementById('cardio-summary').classList.add('open');
 
-  // AI insight async
-  loadCardioAIInsight(currentSession);
+  try{
+    const icons={run:'🏃',cycle:'🚴',walk:'🚶'};
+    const titles={run:'RUN COMPLETE',cycle:'RIDE COMPLETE',walk:'WALK COMPLETE'};
+    document.getElementById('sum-mode-icon').textContent=icons[cardioMode]||'🏅';
+    document.getElementById('sum-title').textContent=titles[cardioMode]||'COMPLETE';
+    document.getElementById('sum-date').textContent=new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
+
+    // Stats grid — moving time is the headline, total shown alongside
+    const statsGrid=document.getElementById('sum-stats-grid');
+    statsGrid.innerHTML=`
+      <div class="sum-stat-card accent"><div class="sum-stat-val">${distKm.toFixed(2)}</div><div class="sum-stat-label">km</div></div>
+      <div class="sum-stat-card accent"><div class="sum-stat-val">${cardioMode==='cycle'?avgSpeed.toFixed(1)+'kph':fmtPace(avgPace)}</div><div class="sum-stat-label">Avg ${cardioMode==='cycle'?'Speed':'Pace'}</div></div>
+      <div class="sum-stat-card"><div class="sum-stat-val">${fmtDuration(exerciseSec)}</div><div class="sum-stat-label">Moving Time</div></div>
+      <div class="sum-stat-card"><div class="sum-stat-val">${fmtDuration(elapsedSec)}</div><div class="sum-stat-label">Total Time</div></div>
+      <div class="sum-stat-card"><div class="sum-stat-val">${Math.round(cals)}</div><div class="sum-stat-label">Calories</div></div>
+      <div class="sum-stat-card"><div class="sum-stat-val">${fmtDuration(stoppedSec)}</div><div class="sum-stat-label">Stopped</div></div>`;
+
+    drawStaticRoute();
+
+    if(epoc>0){
+      document.getElementById('sum-afterburn').style.display='block';
+      document.getElementById('sum-afterburn-val').textContent=epoc;
+      const weightKg=bodyWeightLog.length?bodyWeightLog[bodyWeightLog.length-1].weight:75;
+      const age=userProfile?.age||30;
+      document.getElementById('sum-afterburn-sub').textContent=`Based on ${age}yo, ${weightKg}kg. Your body will continue burning ~${epoc} extra kcal over the next 12–24 hours (EPOC effect).`;
+    } else {
+      document.getElementById('sum-afterburn').style.display='none';
+    }
+
+    if(cardioLaps.length>0){
+      document.getElementById('sum-laps-section').style.display='block';
+      const bestLap=cardioLaps.reduce((b,l)=>l.pace<b.pace?l:b,cardioLaps[0]);
+      const table=document.getElementById('sum-lap-table');
+      table.innerHTML=`<tr><th>Lap</th><th>Dist</th><th>Time</th><th>Pace</th></tr>`;
+      cardioLaps.forEach(lap=>{
+        const tr=document.createElement('tr');const isBest=lap===bestLap;
+        tr.innerHTML=`<td class="${isBest?'lap-best':''}">${lap.number}${isBest?' ★':''}</td><td>${(lap.distance/1000).toFixed(2)}km</td><td>${fmtDuration(lap.duration)}</td><td class="${isBest?'lap-best':''}">${fmtPace(lap.pace)}/km</td>`;
+        table.appendChild(tr);
+      });
+    } else {
+      document.getElementById('sum-laps-section').style.display='none';
+    }
+
+    document.getElementById('sum-details').innerHTML=`
+      <div class="sum-row"><span class="sum-key">Activity</span><span class="sum-val">${title}</span></div>
+      <div class="sum-row"><span class="sum-key">Mode</span><span class="sum-val">${cardioMode.charAt(0).toUpperCase()+cardioMode.slice(1)}</span></div>
+      <div class="sum-row"><span class="sum-key">Moving Time</span><span class="sum-val">${fmtDuration(exerciseSec)}</span></div>
+      <div class="sum-row"><span class="sum-key">Total Elapsed</span><span class="sum-val">${fmtDuration(elapsedSec)}</span></div>
+      <div class="sum-row"><span class="sum-key">Time Stopped</span><span class="sum-val">${fmtDuration(stoppedSec)}</span></div>
+      ${maxSpeed>0?`<div class="sum-row"><span class="sum-key">Max Speed</span><span class="sum-val">${maxSpeed.toFixed(1)} km/h</span></div>`:''}
+      <div class="sum-row"><span class="sum-key">GPS Points</span><span class="sum-val">${cardioRoute.length}</span></div>
+      <div class="sum-row"><span class="sum-key">Afterburn</span><span class="sum-val">+${epoc} kcal (est.)</span></div>`;
+
+    loadCardioAIInsight(currentSession);
+  }catch(e){
+    console.error('Summary render error:',e);
+  }
 }
 
 function drawStaticRoute(){
@@ -4800,7 +4850,7 @@ async function loadCardioAIInsight(session){
   const avgPace=mode!=='cycle'?fmtPace(session.avgPace)+'min/km':session.avgSpeed.toFixed(1)+'km/h avg';
   const prompt=`Give a concise, motivating 2-sentence AI coaching insight for this ${mode} session. Be specific and data-driven.
 Profile: ${userProfile.age}yo ${userProfile.sex}, ${userProfile.level}, goal: ${userProfile.goal}.
-Session: ${distKm}km, ${fmtDuration(session.duration)}, ${avgPace}, ${session.calories}kcal burned, ${session.laps.length} laps.
+Session: ${distKm}km, ${fmtDuration(session.movingTime||session.duration)} moving time (${fmtDuration(session.duration)} total), ${avgPace}, ${session.calories}kcal burned, ${session.laps.length} laps.
 Recent sessions: ${cardioSessions.slice(-3).map(s=>`${(s.distance/1000).toFixed(1)}km ${s.mode}`).join(', ')||'First session'}.
 Keep it under 60 words. Use **bold** for key metrics. Be positive and specific.`;
   try{
@@ -4810,19 +4860,58 @@ Keep it under 60 words. Use **bold** for key metrics. Be positive and specific.`
   }catch(e){aiCard.style.display='none'}
 }
 
+// Compress GPS route before storage — downsample to ≤400 points, round to ~1m precision,
+// strip per-point metadata. A 2-hour ride goes from ~700KB to ~15KB.
+function compressRoute(route){
+  if(!route||!route.length)return[];
+  const MAX=400;
+  const step=Math.max(1,Math.ceil(route.length/MAX));
+  const out=[];
+  for(let i=0;i<route.length;i+=step){
+    const p=route[i];
+    out.push([parseFloat(p.lat.toFixed(5)),parseFloat(p.lng.toFixed(5))]);
+  }
+  // Always keep the final point so the route ends where you finished
+  const last=route[route.length-1];
+  const lastC=[parseFloat(last.lat.toFixed(5)),parseFloat(last.lng.toFixed(5))];
+  if(!out.length||out[out.length-1][0]!==lastC[0]||out[out.length-1][1]!==lastC[1])out.push(lastC);
+  return out;
+}
+
 function saveCardioSession(){
-  if(!currentSession)return;
-  cardioSessions.push(currentSession);
-  saveCardioDB();
+  let saved=false;
+  if(currentSession){
+    // Compress the route — the full GPS array can exceed the storage quota on long sessions
+    currentSession.route=compressRoute(currentSession.route);
+    cardioSessions.push(currentSession);
+    try{
+      saveCardioDB();saved=true;
+    }catch(e1){
+      // Quota exceeded — retry without the route, the stats still matter more
+      try{
+        cardioSessions[cardioSessions.length-1].route=[];
+        saveCardioDB();saved=true;
+      }catch(e2){
+        cardioSessions.pop(); // couldn't save at all — don't corrupt state
+      }
+    }
+  }
+  // ALWAYS close the summary and return home, whatever happened above
   document.getElementById('cardio-summary').classList.remove('open');
   currentSession=null;cardioState='idle';
-  showToast('Activity saved! 🎉','success');
-  renderToday();
-  if(typeof navigator.vibrate==='function')navigator.vibrate([100,50,200]);
+  showView('today');
+  if(saved){
+    showToast('Activity saved! 🎉','success');
+    haptic([100,50,200]);
+  } else {
+    showToast('Storage full — session stats couldn\'t be saved','error');
+  }
 }
 function discardCardioSession(){
   showConfirm('Discard Session?','This activity will not be saved.','Discard','danger',()=>{
-    document.getElementById('cardio-summary').classList.remove('open');currentSession=null;cardioState='idle';
+    document.getElementById('cardio-summary').classList.remove('open');
+    currentSession=null;cardioState='idle';
+    showView('today');
   });
 }
 
@@ -4840,7 +4929,7 @@ function renderCardioHistoryOnToday(){
       card.innerHTML=`<div class="chc-header"><div class="chc-mode-icon">${icons[s.mode]||'🏅'}</div><div class="chc-info"><div class="chc-name">${s.title||s.mode}</div><div class="chc-date">${d}</div></div></div>
         <div class="chc-stats">
           <div class="chc-stat"><div class="chc-stat-val">${(s.distance/1000).toFixed(1)}</div><div class="chc-stat-label">km</div></div>
-          <div class="chc-stat"><div class="chc-stat-val">${fmtDuration(s.duration)}</div><div class="chc-stat-label">Time</div></div>
+          <div class="chc-stat"><div class="chc-stat-val">${fmtDuration(s.movingTime||s.duration)}</div><div class="chc-stat-label">Moving</div></div>
           <div class="chc-stat"><div class="chc-stat-val">${s.calories}</div><div class="chc-stat-label">kcal</div></div>
           ${s.mode!=='cycle'&&s.avgPace?`<div class="chc-stat"><div class="chc-stat-val">${fmtPace(s.avgPace)}</div><div class="chc-stat-label">Min/km</div></div>`:''}
         </div>`;
