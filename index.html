@@ -10,6 +10,7 @@
 <title>IRON LOG — Gym Tracker</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 /* ─── DESIGN TOKENS ─────────────────────────────────────── */
 :root{
@@ -1257,7 +1258,10 @@ b,strong{color:var(--bold-color);font-weight:700}
           <h1 id="dash-greeting-title">GOOD MORNING</h1>
           <p id="today-date-label"></p>
         </div>
-        <button class="dash-avatar-btn" id="user-avatar-today" onclick="openUserMenu()"></button>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div id="sync-badge" style="display:none;align-items:center;font-size:16px;cursor:default" title="Cloud sync"></div>
+          <button class="dash-avatar-btn" id="user-avatar-today" onclick="openUserMenu()"></button>
+        </div>
       </div>
     </div>
 
@@ -1976,6 +1980,113 @@ const QUOTES=[
 })();
 
 // ═══════════════════════════════════════════
+// CLOUD SYNC (Supabase) — accounts + data across devices
+// Paste your project values below (see SETUP-GUIDE.md).
+// If left as placeholders, the app runs in local-only mode — nothing breaks.
+// ═══════════════════════════════════════════
+const SUPABASE_URL='PASTE_YOUR_SUPABASE_URL_HERE';
+const SUPABASE_ANON_KEY='PASTE_YOUR_SUPABASE_ANON_KEY_HERE';
+
+let sb=null;
+(function initCloud(){
+  try{
+    if(SUPABASE_URL.indexOf('https://')===0&&SUPABASE_ANON_KEY.length>30&&window.supabase){
+      sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+    }
+  }catch(e){sb=null}
+})();
+function cloudEnabled(){return sb!==null}
+
+// Every per-user localStorage key that syncs to the cloud
+const CLOUD_KEYS=['exercises','workouts','bwlog','measurements','templates','profile','nutrition','macrogoals','recentfoods','cardio','active'];
+function cloudEmail(username){return username+'@ironlog.app'} // Supabase auth needs an email; usernames map to synthetic ones
+
+function setSyncStatus(state){
+  const el=document.getElementById('sync-badge');if(!el)return;
+  if(!cloudEnabled()){el.style.display='none';return}
+  el.style.display='flex';
+  if(state==='synced'){el.innerHTML='☁️';el.title='Synced to cloud';el.style.opacity='1'}
+  else if(state==='syncing'){el.innerHTML='☁️';el.title='Syncing…';el.style.opacity='.45'}
+  else{el.innerHTML='⛅';el.title='Offline — will sync when back online';el.style.opacity='.45'}
+}
+
+async function cloudSignUp(username,pw){
+  if(!cloudEnabled())return{ok:true,local:true};
+  try{
+    const{data,error}=await sb.auth.signUp({email:cloudEmail(username),password:pw});
+    if(error){
+      if(/already registered/i.test(error.message))return{ok:false,error:'That username is already taken (cloud account exists).'};
+      return{ok:false,error:error.message};
+    }
+    // If email confirmation is accidentally left on, there's no session yet — sign in explicitly
+    if(!data.session){
+      const r=await sb.auth.signInWithPassword({email:cloudEmail(username),password:pw});
+      if(r.error&&/not confirmed/i.test(r.error.message))return{ok:false,error:'Cloud setup issue: disable "Confirm email" in Supabase → Authentication → Providers → Email.'};
+    }
+    return{ok:true};
+  }catch(e){return{ok:false,error:'Network error — check your connection.'}}
+}
+
+async function cloudSignIn(username,pw){
+  if(!cloudEnabled())return{ok:true,local:true};
+  try{
+    const{error}=await sb.auth.signInWithPassword({email:cloudEmail(username),password:pw});
+    if(error){
+      if(/invalid login credentials/i.test(error.message))return{ok:false,badCreds:true,error:'Incorrect username or password.'};
+      if(/not confirmed/i.test(error.message))return{ok:false,error:'Cloud setup issue: disable "Confirm email" in Supabase → Authentication.'};
+      return{ok:false,network:true,error:error.message};
+    }
+    return{ok:true};
+  }catch(e){return{ok:false,network:true,error:'Network error'}}
+}
+
+// Pull all of this user's rows from the cloud into localStorage (cloud wins on login)
+async function cloudPull(){
+  if(!cloudEnabled()||!currentUser)return false;
+  try{
+    setSyncStatus('syncing');
+    const{data,error}=await sb.from('user_data').select('key,value');
+    if(error){setSyncStatus('offline');return false}
+    (data||[]).forEach(row=>{
+      if(!CLOUD_KEYS.includes(row.key))return;
+      const lk='ironlog_u_'+currentUser+'_'+row.key;
+      if(row.value==null)localStorage.removeItem(lk);
+      else localStorage.setItem(lk,row.value);
+    });
+    setSyncStatus('synced');
+    return true;
+  }catch(e){setSyncStatus('offline');return false}
+}
+
+// Debounced full push — called after every local save
+let cloudPushTimer=null;
+function scheduleCloudPush(){
+  if(!cloudEnabled()||!currentUser)return;
+  clearTimeout(cloudPushTimer);
+  setSyncStatus('syncing');
+  cloudPushTimer=setTimeout(cloudPushAll,2500);
+}
+async function cloudPushAll(){
+  if(!cloudEnabled()||!currentUser)return;
+  try{
+    const{data:{user}}=await sb.auth.getUser();
+    if(!user){setSyncStatus('offline');return}
+    const rows=CLOUD_KEYS.map(k=>({
+      user_id:user.id,key:k,
+      value:localStorage.getItem('ironlog_u_'+currentUser+'_'+k),
+      updated_at:new Date().toISOString()
+    }));
+    const{error}=await sb.from('user_data').upsert(rows);
+    setSyncStatus(error?'offline':'synced');
+  }catch(e){setSyncStatus('offline')}
+}
+
+// Flush pending changes when the app is backgrounded/closed
+document.addEventListener('visibilitychange',()=>{
+  if(document.visibilityState==='hidden'&&cloudPushTimer){clearTimeout(cloudPushTimer);cloudPushAll()}
+});
+
+// ═══════════════════════════════════════════
 // AUTH
 // ═══════════════════════════════════════════
 const AUTH_USERS_KEY='ironlog_users';
@@ -2022,6 +2133,11 @@ function forgotStep1(){
   showForgotStep(2);
 }
 function forgotStep2(){
+  if(cloudEnabled()){
+    const errEl=document.getElementById('forgot-error-2');
+    errEl.textContent='This app uses cloud accounts — passwords can\'t be self-reset. Sign in on a device where you\'re still logged in, or contact the app owner.';
+    errEl.classList.add('show');return;
+  }
   const username=document.getElementById('forgot-step-2').dataset.username;
   const pw=document.getElementById('forgot-new-pw').value;
   const confirm=document.getElementById('forgot-confirm-pw').value;
@@ -2046,7 +2162,7 @@ function checkStrengthById(inputId,fillId,labelId){
 function togglePw(id,btn){const inp=document.getElementById(id);const show=inp.type==='password';inp.type=show?'text':'password';btn.innerHTML=show?'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>'}
 function checkUsername(input){const val=input.value.trim().toLowerCase();const hint=document.getElementById('reg-user-hint');if(!val.length){hint.textContent='';return}if(val.length<3){hint.textContent='Too short (min 3 chars)';hint.style.color='var(--red)';return}if(!/^[a-z0-9_]+$/.test(val)){hint.textContent='Letters, numbers, underscore only';hint.style.color='var(--red)';return}const users=getUsers();if(users[val]){hint.textContent='✗ Username taken';hint.style.color='var(--red)'}else{hint.textContent='✓ Available';hint.style.color='var(--green)'}}
 function checkStrength(input){const pw=input.value;const fill=document.getElementById('strength-fill');const label=document.getElementById('strength-label');let score=0;if(pw.length>=6)score++;if(pw.length>=10)score++;if(/[A-Z]/.test(pw))score++;if(/[0-9]/.test(pw))score++;if(/[^A-Za-z0-9]/.test(pw))score++;const pct=(score/5)*100;const colors=['var(--red)','var(--orange)','var(--orange)','var(--green)','var(--green)'];const labels=['Too weak','Weak','Fair','Strong','Very strong'];fill.style.width=pct+'%';fill.style.background=colors[Math.min(score,4)];label.textContent=score===0?'Enter a password':labels[Math.min(score-1,4)];label.style.color=score===0?'var(--text3)':colors[Math.min(score,4)]}
-function handleRegister(){
+async function handleRegister(){
   const username=document.getElementById('reg-username').value.trim().toLowerCase();
   const pw=document.getElementById('reg-password').value;
   const confirm=document.getElementById('reg-confirm').value;
@@ -2057,21 +2173,49 @@ function handleRegister(){
   if(pw.length<6){errEl.textContent='Password must be at least 6 characters.';errEl.classList.add('show');return}
   if(pw!==confirm){errEl.textContent='Passwords do not match.';errEl.classList.add('show');return}
   const users=getUsers();if(users[username]){errEl.textContent='That username is already taken.';errEl.classList.add('show');return}
+  // Create the cloud account first — if it fails, don't create a mismatched local one
+  if(cloudEnabled()){
+    sucEl.textContent='Creating your cloud account…';sucEl.classList.add('show');
+    const r=await cloudSignUp(username,pw);
+    if(!r.ok){sucEl.classList.remove('show');errEl.textContent=r.error;errEl.classList.add('show');return}
+  }
   users[username]={pw:hashPw(pw),created:Date.now(),lastLogin:Date.now()};saveUsers(users);initUserDB(username);
   sucEl.textContent='✓ Account created! Signing you in…';sucEl.classList.add('show');
-  setTimeout(()=>loginUser(username),1200)
+  setTimeout(()=>loginUser(username,{seedCloud:true}),1200)
 }
-function handleLogin(){
+async function handleLogin(){
   const username=document.getElementById('login-username').value.trim().toLowerCase();
   const pw=document.getElementById('login-password').value;
   const errEl=document.getElementById('login-error');errEl.classList.remove('show');
   if(!username||!pw){errEl.textContent='Please enter username and password.';errEl.classList.add('show');return}
-  const users=getUsers();if(!users[username]){errEl.textContent='No account found with that username.';errEl.classList.add('show');return}
+  const users=getUsers();
+  if(cloudEnabled()){
+    errEl.textContent='';
+    const r=await cloudSignIn(username,pw);
+    if(r.ok){
+      // Cloud accepted — ensure a local record exists (may be a brand-new device)
+      if(!users[username])users[username]={pw:hashPw(pw),created:Date.now()};
+      users[username].pw=hashPw(pw);users[username].lastLogin=Date.now();saveUsers(users);
+      loginUser(username);return;
+    }
+    if(r.badCreds){errEl.textContent=r.error;errEl.classList.add('show');return}
+    // Network problem — fall back to local check so you can still train offline
+    showToast('Cloud unreachable — signing in offline','error');
+  }
+  if(!users[username]){errEl.textContent='No account found with that username on this device.';errEl.classList.add('show');return}
   if(users[username].pw!==hashPw(pw)){errEl.textContent='Incorrect password. Please try again.';errEl.classList.add('show');return}
   users[username].lastLogin=Date.now();saveUsers(users);loginUser(username)
 }
-function loginUser(username){currentUser=username;saveSession({username,ts:Date.now()});loadUserData();showApp()}
-function confirmLogout(){showConfirm('Sign Out?','You\'ll need your password to sign back in.','Sign Out','danger',()=>{clearSession();currentUser=null;exercises=null;workouts=[];bodyWeightLog=[];measurements=[];templates=[];userProfile=null;chatHistory=[];nutritionLog={};macroGoals={cal:2000,protein:150,fat:65,fibre:30};recentFoods=[];cardioSessions=[];showAuthScreen()})}
+async function loginUser(username,opts={}){
+  currentUser=username;saveSession({username,ts:Date.now()});
+  if(cloudEnabled()){
+    if(opts.seedCloud){loadUserData();showApp();scheduleCloudPush();return} // fresh account: push starter data up
+    showToast('Syncing your data… ☁️');
+    await cloudPull(); // existing account: cloud is the source of truth on login
+  }
+  loadUserData();showApp();
+}
+function confirmLogout(){showConfirm('Sign Out?','You\'ll need your password to sign back in.','Sign Out','danger',()=>{if(cloudEnabled()){try{cloudPushAll();sb.auth.signOut()}catch(e){}}clearSession();currentUser=null;exercises=null;workouts=[];bodyWeightLog=[];measurements=[];templates=[];userProfile=null;chatHistory=[];nutritionLog={};macroGoals={cal:2000,protein:150,fat:65,fibre:30};recentFoods=[];cardioSessions=[];showAuthScreen()})}
 
 function renderCoachView(){
   if(userProfile){
@@ -2171,17 +2315,17 @@ function loadUserData(){
   recentFoods=JSON.parse(localStorage.getItem(uk('recentfoods'))||'[]');
   cardioSessions=JSON.parse(localStorage.getItem(uk('cardio'))||'[]');
 }
-function saveExercisesDB(){if(currentUser)localStorage.setItem(uk('exercises'),JSON.stringify(exercises))}
-function saveWorkoutsDB(){if(currentUser)localStorage.setItem(uk('workouts'),JSON.stringify(workouts))}
-function saveBWDB(){if(currentUser)localStorage.setItem(uk('bwlog'),JSON.stringify(bodyWeightLog))}
-function saveMeasurementsDB(){if(currentUser)localStorage.setItem(uk('measurements'),JSON.stringify(measurements))}
-function saveTemplatesDB(){if(currentUser)localStorage.setItem(uk('templates'),JSON.stringify(templates))}
-function saveNutritionDB(){if(currentUser){localStorage.setItem(uk('nutrition'),JSON.stringify(nutritionLog));localStorage.setItem(uk('macrogoals'),JSON.stringify(macroGoals));localStorage.setItem(uk('recentfoods'),JSON.stringify(recentFoods))}}
-function saveCardioDB(){if(currentUser)localStorage.setItem(uk('cardio'),JSON.stringify(cardioSessions))}
+function saveExercisesDB(){if(currentUser){localStorage.setItem(uk('exercises'),JSON.stringify(exercises));scheduleCloudPush()}}
+function saveWorkoutsDB(){if(currentUser){localStorage.setItem(uk('workouts'),JSON.stringify(workouts));scheduleCloudPush()}}
+function saveBWDB(){if(currentUser){localStorage.setItem(uk('bwlog'),JSON.stringify(bodyWeightLog));scheduleCloudPush()}}
+function saveMeasurementsDB(){if(currentUser){localStorage.setItem(uk('measurements'),JSON.stringify(measurements));scheduleCloudPush()}}
+function saveTemplatesDB(){if(currentUser){localStorage.setItem(uk('templates'),JSON.stringify(templates));scheduleCloudPush()}}
+function saveNutritionDB(){if(currentUser){localStorage.setItem(uk('nutrition'),JSON.stringify(nutritionLog));localStorage.setItem(uk('macrogoals'),JSON.stringify(macroGoals));localStorage.setItem(uk('recentfoods'),JSON.stringify(recentFoods));scheduleCloudPush()}}
+function saveCardioDB(){if(currentUser){localStorage.setItem(uk('cardio'),JSON.stringify(cardioSessions));scheduleCloudPush()}}
 function getActiveKey(){return currentUser?'ironlog_u_'+currentUser+'_active':null}
-function saveActiveWorkout(d){const k=getActiveKey();if(k)localStorage.setItem(k,JSON.stringify(d))}
+function saveActiveWorkout(d){const k=getActiveKey();if(k){localStorage.setItem(k,JSON.stringify(d));scheduleCloudPush()}}
 function loadActiveWorkout(){const k=getActiveKey();if(!k)return null;try{return JSON.parse(localStorage.getItem(k))}catch{return null}}
-function clearActiveWorkout(){const k=getActiveKey();if(k)localStorage.removeItem(k)}
+function clearActiveWorkout(){const k=getActiveKey();if(k){localStorage.removeItem(k);scheduleCloudPush()}}
 
 // ═══════════════════════════════════════════
 // VIEW ROUTING
@@ -3051,7 +3195,7 @@ function saveProfile() {
   if (!sex) { showToast('Please select your sex', 'error'); return; }
 
   userProfile = { age, height: height || null, sex, level, goal, days: parseInt(days), health: health || null, savedAt: Date.now() };
-  if (currentUser) localStorage.setItem(uk('profile'), JSON.stringify(userProfile));
+  if (currentUser) { localStorage.setItem(uk('profile'), JSON.stringify(userProfile)); scheduleCloudPush(); }
 
   updateProfileUI();
   showToast('Profile saved! Loading insights… 🤖', 'success');
@@ -4188,10 +4332,23 @@ function openCardioTracker(mode='run'){
   checkLocationPermissionThenStart();
 }
 
+// Finishing an activity ALWAYS leads to the summary screen, where SAVE is the
+// primary action. Discarding is only ever an explicit choice on that screen.
+function finishCardio(){
+  if(cardioState==='active')pauseCardio();
+  stopTimer();stopGPS();releaseWakeLock();
+  buildCardioSummary();
+}
+
 function closeCardioTracker(){
-  if(cardioState==='active'||cardioState==='paused'){
-    showConfirm('Discard session?','Your current activity will be lost.','Discard','danger',()=>{_closeCardio()});
-  } else _closeCardio();
+  const hasData=cardioTotalDist>10||cardioMovingSec>10||cardioRoute.length>3;
+  if((cardioState==='active'||cardioState==='paused')&&hasData){
+    // They've recorded real activity — never offer to throw it away; go to save
+    finishCardio();
+  } else {
+    // Nothing recorded yet — safe to just close
+    _closeCardio();
+  }
 }
 function _closeCardio(){
   stopGPS();stopTimer();releaseWakeLock();
@@ -4422,6 +4579,9 @@ function initMap(){
 function initLeafletMap(){
   if(!window.L)return;
   const mapEl=document.getElementById('cardio-map');if(!mapEl)return;
+  // Destroy any map left over from a previous session (finishing via the
+  // summary keeps the instance alive — recreating without removal throws)
+  if(map){try{map.remove()}catch(e){}map=null;mapPolyline=null;mapPolylineCasing=null;mapUserMarker=null;mapAccuracyCircle=null}
   // Start on last known position if available, else world view until GPS arrives
   const startPos=lastKnownPos?[lastKnownPos.lat,lastKnownPos.lng]:[20,0];
   const startZoom=lastKnownPos?16:2;
@@ -4519,11 +4679,9 @@ function resumeCardio(){
 }
 
 function stopCardio(){
-  showConfirm('Finish Activity?','Save this session to your log?','Finish','primary',()=>{
-    if(cardioState==='active')pauseCardio(); // don't double-pause if already paused
-    stopTimer();stopGPS();releaseWakeLock();
-    buildCardioSummary();
-  });
+  // No intermediate dialog — the summary screen IS the finish screen,
+  // with SAVE ACTIVITY as the primary button and discard as a small secondary link.
+  finishCardio();
 }
 
 function startTimer(){cardioTimer=setInterval(cardioTick,1000)}
@@ -4969,7 +5127,7 @@ setTimeout(()=>{
     const session=getSession();
     if(session&&session.username){
       const users=getUsers();
-      if(users[session.username]){currentUser=session.username;loadUserData();showApp()}
+      if(users[session.username]){currentUser=session.username;(async()=>{if(cloudEnabled())await cloudPull();loadUserData();showApp()})()}
       else{clearSession();showAuthScreen()}
     }else{showAuthScreen()}
   },600);
